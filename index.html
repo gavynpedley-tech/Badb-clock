@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#bfe3f2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<title>Badb Clock</title>
+</head>
+<body>
+
+<!-- Screen 1: choose the transition -->
+<section id="screen-choose" class="screen active">
+  <h1 class="screen-title">Where are we going?</h1>
+  <div id="transition-grid" class="card-grid"></div>
+  <div class="settings-row">
+    <span class="settings-label">Who is going?</span>
+    <div id="character-picker" class="character-picker"></div>
+  </div>
+</section>
+
+<!-- Screen 2: choose the time -->
+<section id="screen-time" class="screen">
+  <button id="back-to-choose" class="back-btn" aria-label="Go back">←</button>
+  <div class="chosen-transition">
+    <span id="time-emoji" class="chosen-emoji"></span>
+    <h1 id="time-title" class="screen-title"></h1>
+  </div>
+  <h2 class="screen-subtitle">How long?</h2>
+  <div id="time-grid" class="time-grid"></div>
+</section>
+
+<!-- Screen 3: the countdown scene -->
+<section id="screen-timer" class="screen">
+  <button id="cancel-timer" class="back-btn" aria-label="Stop and go back">←</button>
+  <div id="timer-phrase" class="timer-phrase"></div>
+  <div id="scene" class="scene">
+    <div class="sky">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="sun"></div>
+    </div>
+    <div class="ground"></div>
+    <div id="walker" class="walker"><span id="walker-emoji"></span></div>
+    <div id="destination" class="destination"><span id="destination-emoji"></span></div>
+  </div>
+  <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+  <div id="time-left" class="time-left">0:00</div>
+  <div class="timer-controls">
+    <button id="pause-btn" class="control-btn">⏸ Pause</button>
+  </div>
+</section>
+
+<!-- Screen 4: time's up -->
+<section id="screen-done" class="screen">
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+  <div class="done-scene">
+    <span id="done-emoji" class="done-emoji"></span>
+  </div>
+  <h1 id="done-phrase" class="done-phrase"></h1>
+  <div class="done-buttons">
+    <button id="again-btn" class="control-btn big">↻ Again</button>
+    <button id="home-btn" class="control-btn big">🏡 Home</button>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

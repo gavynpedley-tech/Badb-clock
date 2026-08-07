@@ -1,0 +1,13 @@
+{
+  "name": "Badb Clock",
+  "short_name": "Badb Clock",
+  "description": "Autism-friendly visual countdown timer for transitions",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#bfe3f2",
+  "theme_color": "#bfe3f2",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
