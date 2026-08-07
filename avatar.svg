@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112">
+  <!-- Badb: wavy golden hair with a fringe, rosy cheeks, blue top, yellow scarf -->
+  <!-- back hair (behind everything) -->
+  <path d="M40 6
+           C 22 6, 14 20, 15 34
+           C 15.5 42, 12 46, 13 54
+           C 14 62, 20 64, 24 61
+           C 21 65, 25 70, 30 67
+           L 30 52 L 50 52 L 50 67
+           C 55 70, 59 65, 56 61
+           C 60 64, 66 62, 67 54
+           C 68 46, 64.5 42, 65 34
+           C 66 20, 58 6, 40 6 Z"
+        fill="#e2a94e"/>
+  <path d="M17 36 C 15 44, 13 48, 14.5 55 C 16 60, 20 61, 23 58 C 19 52, 20 44, 19 38 Z" fill="#f0be66"/>
+  <path d="M63 36 C 65 44, 67 48, 65.5 55 C 64 60, 60 61, 57 58 C 61 52, 60 44, 61 38 Z" fill="#f0be66"/>
+
+  <!-- legs -->
+  <rect x="30" y="84" width="8" height="20" rx="4" fill="#8fa8c4"/>
+  <rect x="42" y="84" width="8" height="20" rx="4" fill="#8fa8c4"/>
+  <ellipse cx="34" cy="106" rx="6" ry="4" fill="#c86a80"/>
+  <ellipse cx="46" cy="106" rx="6" ry="4" fill="#c86a80"/>
+
+  <!-- arms -->
+  <rect x="18" y="58" width="9" height="26" rx="4.5" fill="#aecdee"/>
+  <rect x="53" y="58" width="9" height="26" rx="4.5" fill="#aecdee"/>
+  <circle cx="22.5" cy="86" r="4" fill="#ffdfc9"/>
+  <circle cx="57.5" cy="86" r="4" fill="#ffdfc9"/>
+
+  <!-- body -->
+  <path d="M28 56 C 28 52, 52 52, 52 56 L 54 84 C 54 88, 26 88, 26 84 Z" fill="#aecdee"/>
+
+  <!-- yellow scarf/kerchief -->
+  <path d="M30 54 L 50 54 L 40 66 Z" fill="#f4c94f"/>
+  <path d="M30 54 C 34 58, 46 58, 50 54 L 50 57 C 46 61, 34 61, 30 57 Z" fill="#e8b83a"/>
+
+  <!-- head -->
+  <circle cx="40" cy="32" r="19" fill="#ffdfc9"/>
+
+  <!-- cheeks -->
+  <ellipse cx="30" cy="39" rx="4.5" ry="3" fill="#f59f96" opacity="0.55"/>
+  <ellipse cx="50" cy="39" rx="4.5" ry="3" fill="#f59f96" opacity="0.55"/>
+
+  <!-- big blue eyes with little lashes -->
+  <circle cx="33" cy="33" r="2.6" fill="#5b87b8"/>
+  <circle cx="47" cy="33" r="2.6" fill="#5b87b8"/>
+  <circle cx="33" cy="33" r="1.2" fill="#2e3440"/>
+  <circle cx="47" cy="33" r="1.2" fill="#2e3440"/>
+  <circle cx="33.9" cy="32.1" r="0.8" fill="#fff"/>
+  <circle cx="47.9" cy="32.1" r="0.8" fill="#fff"/>
+  <path d="M29.5 30.5 C 31 29, 34 28.6, 36 29.6" stroke="#463829" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <path d="M43.5 29.6 C 45.5 28.6, 48.5 29, 50 30.5" stroke="#463829" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+
+  <!-- nose + smile -->
+  <path d="M39 37.5 C 39.7 38.6, 40.3 38.6, 41 37.5" stroke="#e8b49a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M35.5 43 C 38 45.6, 42 45.6, 44.5 43" stroke="#c97b6d" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+
+  <!-- fringe: soft scalloped bangs over the forehead -->
+  <path d="M21 32
+           C 19 16, 30 9, 40 9
+           C 50 9, 61 16, 59 32
+           C 56 28, 55 26, 53.5 27.5
+           C 52 24, 49 23.5, 47 26
+           C 45 22.5, 41 22.5, 39 25.5
+           C 37 22.5, 33 23, 31.5 26.5
+           C 29 24, 26.5 25, 25.5 28
+           C 24 26.5, 22.5 28.5, 21 32 Z"
+        fill="#e8b04b"/>
+  <path d="M28 12 C 33 10, 47 10, 52 12 C 47 13.5, 33 13.5, 28 12 Z" fill="#f2c66d" opacity="0.8"/>
+
+  <!-- little pigtail tuft with the yellow duck clip -->
+  <path d="M56 12 C 60 6, 66 7, 66 12 C 66 16, 61 17, 58 15 Z" fill="#e8b04b"/>
+  <circle cx="57.5" cy="13.5" r="1.6" fill="#e05a8a"/>
+  <circle cx="62" cy="10.5" r="3.2" fill="#f7d24b"/>
+  <circle cx="63.2" cy="9.8" r="0.6" fill="#463829"/>
+  <path d="M65 10.5 L 67 11.2 L 65 12 Z" fill="#e8862f"/>
+</svg>

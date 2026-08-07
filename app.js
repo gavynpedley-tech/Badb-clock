@@ -18,11 +18,20 @@ const TRANSITIONS = [
 ];
 
 const MINUTES = [1, 2, 3, 5, 10, 15];
-const CHARACTERS = ["🧒", "🧒🏻", "🧒🏼", "🧒🏽", "🧒🏾", "🧒🏿", "👧", "👦"];
+const CHARACTERS = [
+  { id: "badb", img: "avatar.svg" },
+  { id: "kid", emoji: "🧒" },
+  { id: "girl", emoji: "👧" },
+  { id: "boy", emoji: "👦" },
+  { id: "kid-light", emoji: "🧒🏻" },
+  { id: "kid-medium", emoji: "🧒🏽" },
+  { id: "kid-dark", emoji: "🧒🏿" },
+];
 const NEARLY_SECONDS = 10;
 
 const $ = (id) => document.getElementById(id);
 
+const savedCharacter = localStorage.getItem("badb-character");
 const state = {
   transition: null,
   totalSeconds: 0,
@@ -30,8 +39,14 @@ const state = {
   intervalId: null,
   paused: false,
   wakeLock: null,
-  character: localStorage.getItem("badb-character") || CHARACTERS[0],
+  character:
+    CHARACTERS.find((c) => c.id === savedCharacter || c.emoji === savedCharacter) ||
+    CHARACTERS[0],
 };
+
+function characterHTML(c) {
+  return c.img ? `<img class="char-img" src="${c.img}" alt="">` : c.emoji;
+}
 
 /* ---------- screen switching ---------- */
 
@@ -61,10 +76,10 @@ function buildChooseScreen() {
   CHARACTERS.forEach((c) => {
     const opt = document.createElement("button");
     opt.className = "character-option" + (c === state.character ? " selected" : "");
-    opt.textContent = c;
+    opt.innerHTML = characterHTML(c);
     opt.addEventListener("click", () => {
       state.character = c;
-      localStorage.setItem("badb-character", c);
+      localStorage.setItem("badb-character", c.id);
       picker.querySelectorAll(".character-option").forEach((o) => o.classList.remove("selected"));
       opt.classList.add("selected");
     });
@@ -93,7 +108,7 @@ function startTimer(seconds) {
   state.paused = false;
 
   $("timer-phrase").textContent = state.transition.phrase;
-  $("walker-emoji").textContent = state.character;
+  $("walker-emoji").innerHTML = characterHTML(state.character);
   $("destination-emoji").textContent = state.transition.emoji;
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
@@ -135,7 +150,7 @@ function finishTimer() {
   state.intervalId = null;
   releaseWakeLock();
 
-  $("done-emoji").textContent = `${state.character}${state.transition.emoji}`;
+  $("done-emoji").innerHTML = `${characterHTML(state.character)}${state.transition.emoji}`;
   $("done-phrase").textContent = state.transition.done;
   showScreen("screen-done");
   playChime();

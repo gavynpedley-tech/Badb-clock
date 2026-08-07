@@ -313,6 +313,18 @@ body {
   to { transform: translateY(110vh) rotate(200deg); opacity: 0.6; }
 }
 
+/* ---------- drawn avatars (SVG characters mixed in with emoji ones) ---------- */
+
+.char-img {
+  height: 1.2em;
+  width: auto;
+  display: inline-block;
+  vertical-align: baseline;
+}
+.walker .char-img { height: 2em; }
+.character-option .char-img { height: 2.1rem; display: block; }
+.done-emoji .char-img { height: 1em; margin-right: 0.08em; }
+
 /* Respect users who need less motion: freeze the decorative animation,
    keep the position/width transitions that carry the countdown meaning. */
 @media (prefers-reduced-motion: reduce) {

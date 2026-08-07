@@ -6,7 +6,7 @@ An autism-friendly **visual countdown timer for transitions**, built for one par
 
 1. **Where are we going?** — pick a transition from big, friendly cards: the car, food, Granny's, school, home, bath, bed, the park, the shops, or a walk.
 2. **How long?** — pick a time (1–15 minutes).
-3. **The countdown** — an animated character (choose one that looks like your kid) walks across a calm scene toward the destination as the time runs down. A green progress bar shrinks alongside, and in the last 10 seconds everything gently shifts to "Nearly there!".
+3. **The countdown** — an animated character walks across a calm scene toward the destination as the time runs down. The default character is a hand-drawn cartoon avatar of Badb herself (`avatar.svg` — wavy golden hair, blue eyes, rosy cheeks, yellow scarf, duck hair clip), with emoji alternatives in the picker. A green progress bar shrinks alongside, and in the last 10 seconds everything gently shifts to "Nearly there!".
 4. **Time's up** — the character arrives, a soft rising chime plays twice, and a calm sprinkle of stars celebrates the arrival.
 
 ## Design principles
