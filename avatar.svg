@@ -15,20 +15,21 @@
   <path d="M17 36 C 15 44, 13 48, 14.5 55 C 16 60, 20 61, 23 58 C 19 52, 20 44, 19 38 Z" fill="#f0be66"/>
   <path d="M63 36 C 65 44, 67 48, 65.5 55 C 64 60, 60 61, 57 58 C 61 52, 60 44, 61 38 Z" fill="#f0be66"/>
 
-  <!-- legs -->
-  <rect x="30" y="84" width="8" height="20" rx="4" fill="#8fa8c4"/>
-  <rect x="42" y="84" width="8" height="20" rx="4" fill="#8fa8c4"/>
+  <!-- legs in white tights -->
+  <rect x="30" y="84" width="8" height="20" rx="4" fill="#faf3f6"/>
+  <rect x="42" y="84" width="8" height="20" rx="4" fill="#faf3f6"/>
   <ellipse cx="34" cy="106" rx="6" ry="4" fill="#c86a80"/>
   <ellipse cx="46" cy="106" rx="6" ry="4" fill="#c86a80"/>
 
-  <!-- arms -->
-  <rect x="18" y="58" width="9" height="26" rx="4.5" fill="#aecdee"/>
-  <rect x="53" y="58" width="9" height="26" rx="4.5" fill="#aecdee"/>
+  <!-- arms (pink sleeves) -->
+  <rect x="18" y="58" width="9" height="26" rx="4.5" fill="#f3b3ca"/>
+  <rect x="53" y="58" width="9" height="26" rx="4.5" fill="#f3b3ca"/>
   <circle cx="22.5" cy="86" r="4" fill="#ffdfc9"/>
   <circle cx="57.5" cy="86" r="4" fill="#ffdfc9"/>
 
-  <!-- body -->
-  <path d="M28 56 C 28 52, 52 52, 52 56 L 54 84 C 54 88, 26 88, 26 84 Z" fill="#aecdee"/>
+  <!-- pink dress, flared with a lighter hem -->
+  <path d="M28 56 C 28 52, 52 52, 52 56 L 58 85 C 59 90, 21 90, 22 85 Z" fill="#ee8fb2"/>
+  <path d="M22.6 83 L 57.4 83 C 58.5 88, 21.5 88, 22.6 83 Z" fill="#f8c3d6"/>
 
   <!-- yellow scarf/kerchief -->
   <path d="M30 54 L 50 54 L 40 66 Z" fill="#f4c94f"/>
