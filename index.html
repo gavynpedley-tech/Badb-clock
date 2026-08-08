@@ -38,6 +38,40 @@
   <button id="back-food" class="back-btn" aria-label="Go back">←</button>
   <h1 class="screen-title">What are we having?</h1>
   <div id="food-grid" class="card-grid"></div>
+  <div class="settings-row">
+    <div class="food-admin">
+      <button id="add-food-btn" class="admin-btn">＋ Add a food</button>
+      <button id="edit-foods-btn" class="admin-btn" hidden>✎ Edit foods</button>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 1d: add or edit a custom food (parent flow) -->
+<section id="screen-add-food" class="screen">
+  <button id="back-add-food" class="back-btn" aria-label="Go back">←</button>
+  <h1 id="add-food-title" class="screen-title">Add a food</h1>
+  <div class="add-food-form">
+    <label class="photo-drop">
+      <input type="file" id="food-photo-input" accept="image/*" capture="environment" hidden>
+      <span id="photo-drop-hint">📷 Tap to take a photo</span>
+      <img id="photo-preview" class="photo-preview" alt="" hidden>
+    </label>
+    <button id="cartoon-toggle" class="control-btn" hidden>🎨 Cartoon: on</button>
+    <input type="text" id="food-name" class="text-input" placeholder="What is it called?" maxlength="24">
+    <div class="cat-chips">
+      <button class="cat-chip" data-cat="dinner">Dinner</button>
+      <button class="cat-chip" data-cat="dessert">Dessert</button>
+      <button class="cat-chip" data-cat="both">Both</button>
+    </div>
+    <button id="save-food" class="control-btn big" disabled>✓ Save</button>
+  </div>
+</section>
+
+<!-- Screen 1e: manage custom foods -->
+<section id="screen-edit-foods" class="screen">
+  <button id="back-edit-foods" class="back-btn" aria-label="Go back">←</button>
+  <h1 class="screen-title">Your foods</h1>
+  <div id="edit-food-list" class="edit-food-list"></div>
 </section>
 
 <!-- Screen 2: choose the time -->

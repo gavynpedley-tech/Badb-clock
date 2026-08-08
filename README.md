@@ -12,6 +12,10 @@ An autism-friendly **visual countdown timer for transitions**, built for one par
 
 While the countdown runs, a quiet music-box loop plays underneath (think kid-friendly elevator music — a slow C–Am–F–G waltz generated with the Web Audio API, so no audio files are needed and it works offline). The 🎵 button on the timer screen turns it off for quiet days, and the choice is remembered.
 
+### Your own foods, from photos
+
+On the food screen, **＋ Add a food** opens the camera: take a photo of the real food, optionally tap **🎨 Cartoon** to run it through an on-device posterise-and-outline filter (plain canvas code — no AI service, nothing uploaded), name it, and file it under Dinner, Dessert or Both. It then behaves exactly like the built-in foods, including being held in the avatar's hands on the arrival close-up. **✎ Edit foods** renames, re-files or removes them. Everything is stored on the device in IndexedDB — no accounts, no servers, works offline.
+
 ## Design principles
 
 - **Predictable**: the same four steps every time, no surprises, no ads, no notifications.

@@ -119,6 +119,134 @@ function foodSVG(food) {
   return `<svg class="food-svg" viewBox="0 0 40 40" aria-hidden="true">${FOOD_ART[food.id]}</svg>`;
 }
 
+function foodHTML(food) {
+  return food.custom
+    ? `<img class="food-photo" src="${food.useCartoon ? food.cartoon : food.photo}" alt="">`
+    : foodSVG(food);
+}
+
+/* ---------- custom photo foods, stored on the phone in IndexedDB ----------
+   Parents (or Badb) can photograph a real food, optionally cartoonify it,
+   name it and file it under dinner/dessert. Nothing leaves the device. */
+
+let customFoods = [];
+
+function foodsDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("badb-clock", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("foods", { keyPath: "id" });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function loadCustomFoods() {
+  try {
+    const db = await foodsDB();
+    customFoods = await new Promise((resolve, reject) => {
+      const req = db.transaction("foods").objectStore("foods").getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (_) {
+    customFoods = []; // storage unavailable — built-in foods still work
+  }
+}
+
+async function saveCustomFood(food) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("foods", "readwrite");
+    tx.objectStore("foods").put(food);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteCustomFood(id) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("foods", "readwrite");
+    tx.objectStore("foods").delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/* ---------- on-phone "make it a cartoon" filter ----------
+   Smooth (repeated down/up-scaling), boost saturation, flatten the colours
+   into a few levels, then darken strong edges for an outline. All canvas
+   work, so it runs instantly and offline. */
+
+function cartoonize(source) {
+  const SIZE = 320;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = SIZE;
+  const ctx = canvas.getContext("2d");
+
+  // smoothing pass: shrink and re-enlarge twice
+  const small = document.createElement("canvas");
+  small.width = small.height = 80;
+  const sctx = small.getContext("2d");
+  sctx.drawImage(source, 0, 0, 80, 80);
+  ctx.filter = "saturate(1.4)";
+  ctx.drawImage(small, 0, 0, SIZE, SIZE);
+  ctx.filter = "none";
+  sctx.drawImage(canvas, 0, 0, 80, 80);
+  ctx.drawImage(small, 0, 0, SIZE, SIZE);
+
+  const img = ctx.getImageData(0, 0, SIZE, SIZE);
+  const d = img.data;
+
+  // edge map from the smoothed image (simple gradient magnitude)
+  const gray = new Float32Array(SIZE * SIZE);
+  for (let i = 0; i < SIZE * SIZE; i++) {
+    gray[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+  }
+  const edge = new Float32Array(SIZE * SIZE);
+  for (let y = 1; y < SIZE - 1; y++) {
+    for (let x = 1; x < SIZE - 1; x++) {
+      const i = y * SIZE + x;
+      const gx = gray[i + 1] - gray[i - 1];
+      const gy = gray[i + SIZE] - gray[i - SIZE];
+      edge[i] = Math.min(1, Math.sqrt(gx * gx + gy * gy) / 60);
+    }
+  }
+
+  // posterize + outline
+  const LEVELS = 5;
+  const step = 255 / (LEVELS - 1);
+  for (let i = 0; i < SIZE * SIZE; i++) {
+    const e = edge[i] > 0.45 ? 0.65 : 0;
+    for (let c = 0; c < 3; c++) {
+      const q = Math.round(d[i * 4 + c] / step) * step;
+      d[i * 4 + c] = q * (1 - e);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
+
+/* read a picked photo, centre-crop it square, return both versions */
+function processPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      const side = Math.min(im.width, im.height);
+      const sx = (im.width - side) / 2;
+      const sy = (im.height - side) / 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 512;
+      canvas.getContext("2d").drawImage(im, sx, sy, side, side, 0, 0, 512, 512);
+      resolve({ photo: canvas.toDataURL("image/jpeg", 0.85), cartoon: cartoonize(canvas) });
+    };
+    im.onerror = reject;
+    im.src = url;
+  });
+}
+
 /* Drawn art for transitions where an emoji doesn't match the real thing —
    like the shower, which is a cubicle with a glass door, not a bare head. */
 const TRANSITION_ART = {
@@ -221,20 +349,24 @@ function buildChooseScreen() {
 /* ---------- screens 1b/1c: dinner-or-dessert, then pick the food ---------- */
 
 function buildFoodGrid(category) {
+  state.foodCategory = category;
   const grid = $("food-grid");
   grid.innerHTML = "";
-  FOODS.filter((f) => f.cats.includes(category)).forEach((f) => {
-    const card = document.createElement("button");
-    card.className = "transition-card";
-    card.innerHTML = `<span class="emoji">${foodSVG(f)}</span><span class="label">${f.label}</span>`;
-    card.addEventListener("click", () => {
-      state.food = f;
-      $("time-emoji").innerHTML = foodSVG(f);
-      $("time-title").textContent = f.phrase;
-      showScreen("screen-time");
+  [...FOODS, ...customFoods]
+    .filter((f) => f.cats.includes(category))
+    .forEach((f) => {
+      const card = document.createElement("button");
+      card.className = "transition-card";
+      card.innerHTML = `<span class="emoji">${foodHTML(f)}</span><span class="label">${f.label}</span>`;
+      card.addEventListener("click", () => {
+        state.food = f;
+        $("time-emoji").innerHTML = foodHTML(f);
+        $("time-title").textContent = f.phrase;
+        showScreen("screen-time");
+      });
+      grid.appendChild(card);
     });
-    grid.appendChild(card);
-  });
+  $("edit-foods-btn").hidden = customFoods.length === 0;
 }
 
 $("cat-dinner").addEventListener("click", () => {
@@ -270,7 +402,7 @@ function startTimer(seconds) {
 
   $("timer-phrase").textContent = state.food ? state.food.phrase : state.transition.phrase;
   $("walker-emoji").innerHTML = characterHTML(state.character);
-  if (state.food) $("destination-emoji").innerHTML = foodSVG(state.food);
+  if (state.food) $("destination-emoji").innerHTML = foodHTML(state.food);
   else $("destination-emoji").innerHTML = transitionIconHTML(state.transition);
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
@@ -320,7 +452,7 @@ function finishTimer() {
     if (state.character.img) {
       $("done-emoji").innerHTML = eatingSceneSVG(state.food);
     } else {
-      $("done-emoji").innerHTML = `${characterHTML(state.character)}${foodSVG(state.food)}`;
+      $("done-emoji").innerHTML = `${characterHTML(state.character)}${foodHTML(state.food)}`;
     }
     $("done-phrase").textContent = state.food.done;
     showScreen("screen-done");
@@ -367,7 +499,11 @@ function eatingSceneSVG(food) {
     <animateTransform attributeName="transform" type="rotate"
                       values="-3 60 94; 3 60 94; -3 60 94"
                       dur="1.1s" repeatCount="indefinite"/>
-    <g transform="translate(40 74)">${FOOD_ART[food.id]}</g>
+    ${food.custom
+      ? `<clipPath id="food-clip"><rect x="40" y="72" width="40" height="40" rx="9"/></clipPath>
+         <image href="${food.useCartoon ? food.cartoon : food.photo}" x="40" y="72" width="40" height="40"
+                preserveAspectRatio="xMidYMid slice" clip-path="url(#food-clip)"/>`
+      : `<g transform="translate(40 74)">${FOOD_ART[food.id]}</g>`}
     <circle cx="44" cy="96" r="7.5" fill="#ffdfc9"/>
     <circle cx="76" cy="98" r="7.5" fill="#ffdfc9"/>
   </g>
@@ -609,8 +745,136 @@ $("again-btn").addEventListener("click", () => startTimer(state.totalSeconds));
 
 $("home-btn").addEventListener("click", () => showScreen("screen-choose"));
 
+/* ---------- add / edit custom foods ---------- */
+
+const addFoodState = { editing: null, photo: null, cartoon: null, useCartoon: true, cat: "both" };
+
+function openAddFood(food) {
+  addFoodState.editing = food || null;
+  addFoodState.photo = food ? food.photo : null;
+  addFoodState.cartoon = food ? food.cartoon : null;
+  addFoodState.useCartoon = food ? food.useCartoon : true;
+  addFoodState.cat = food
+    ? (food.cats.length === 2 ? "both" : food.cats[0])
+    : (state.foodCategory || "both");
+  $("add-food-title").textContent = food ? "Edit food" : "Add a food";
+  $("food-name").value = food ? food.label : "";
+  $("food-photo-input").value = "";
+  refreshAddFoodForm();
+  showScreen("screen-add-food");
+}
+
+function refreshAddFoodForm() {
+  const havePhoto = !!addFoodState.photo;
+  $("photo-preview").hidden = !havePhoto;
+  $("photo-drop-hint").hidden = havePhoto;
+  $("cartoon-toggle").hidden = !havePhoto;
+  if (havePhoto) {
+    $("photo-preview").src = addFoodState.useCartoon ? addFoodState.cartoon : addFoodState.photo;
+    $("cartoon-toggle").textContent = addFoodState.useCartoon ? "🎨 Cartoon: on" : "🎨 Cartoon: off";
+  }
+  document.querySelectorAll(".cat-chip").forEach((chip) =>
+    chip.classList.toggle("selected", chip.dataset.cat === addFoodState.cat)
+  );
+  $("save-food").disabled = !(havePhoto && $("food-name").value.trim());
+}
+
+$("food-photo-input").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  $("photo-drop-hint").textContent = "…";
+  try {
+    const { photo, cartoon } = await processPhoto(file);
+    addFoodState.photo = photo;
+    addFoodState.cartoon = cartoon;
+  } catch (_) {
+    $("photo-drop-hint").textContent = "📷 That photo didn't work — try again";
+    return;
+  }
+  refreshAddFoodForm();
+});
+
+$("cartoon-toggle").addEventListener("click", () => {
+  addFoodState.useCartoon = !addFoodState.useCartoon;
+  refreshAddFoodForm();
+});
+
+$("food-name").addEventListener("input", refreshAddFoodForm);
+
+document.querySelectorAll(".cat-chip").forEach((chip) =>
+  chip.addEventListener("click", () => {
+    addFoodState.cat = chip.dataset.cat;
+    refreshAddFoodForm();
+  })
+);
+
+$("save-food").addEventListener("click", async () => {
+  const label = $("food-name").value.trim();
+  const food = {
+    id: addFoodState.editing ? addFoodState.editing.id : `custom-${Date.now()}`,
+    custom: true,
+    label,
+    cats: addFoodState.cat === "both" ? ["dinner", "dessert"] : [addFoodState.cat],
+    photo: addFoodState.photo,
+    cartoon: addFoodState.cartoon,
+    useCartoon: addFoodState.useCartoon,
+    phrase: `We're going for ${label}`,
+    done: `Yay! ${label} time!`,
+  };
+  try {
+    await saveCustomFood(food);
+  } catch (_) { /* keep it for this session even if storage failed */ }
+  const idx = customFoods.findIndex((f) => f.id === food.id);
+  if (idx >= 0) customFoods[idx] = food;
+  else customFoods.push(food);
+  buildFoodGrid(state.foodCategory || food.cats[0]);
+  showScreen("screen-food");
+});
+
+function buildEditFoodList() {
+  const list = $("edit-food-list");
+  list.innerHTML = "";
+  customFoods.forEach((f) => {
+    const row = document.createElement("div");
+    row.className = "edit-food-row";
+    const catLabel = f.cats.length === 2 ? "Dinner + dessert" : f.cats[0] === "dinner" ? "Dinner" : "Dessert";
+    row.innerHTML = `
+      ${foodHTML(f)}
+      <div class="info"><span class="name">${f.label}</span><span class="cats">${catLabel}</span></div>
+      <button class="row-btn edit" aria-label="Edit ${f.label}">✎</button>
+      <button class="row-btn delete" aria-label="Delete ${f.label}">🗑</button>`;
+    row.querySelector(".edit").addEventListener("click", () => openAddFood(f));
+    row.querySelector(".delete").addEventListener("click", async () => {
+      if (!confirm(`Remove ${f.label}?`)) return;
+      try {
+        await deleteCustomFood(f.id);
+      } catch (_) { /* still remove from the session */ }
+      customFoods = customFoods.filter((x) => x.id !== f.id);
+      if (customFoods.length === 0) {
+        buildFoodGrid(state.foodCategory || "dinner");
+        showScreen("screen-food");
+      } else {
+        buildEditFoodList();
+      }
+    });
+    list.appendChild(row);
+  });
+}
+
+$("add-food-btn").addEventListener("click", () => openAddFood(null));
+$("edit-foods-btn").addEventListener("click", () => {
+  buildEditFoodList();
+  showScreen("screen-edit-foods");
+});
+$("back-add-food").addEventListener("click", () => showScreen("screen-food"));
+$("back-edit-foods").addEventListener("click", () => {
+  buildFoodGrid(state.foodCategory || "dinner");
+  showScreen("screen-food");
+});
+
 buildChooseScreen();
 buildTimeScreen();
+loadCustomFoods();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
