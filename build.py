@@ -13,9 +13,11 @@ html = (root / "index.html").read_text()
 css = (root / "style.css").read_text()
 js = (root / "app.js").read_text()
 avatar = base64.b64encode((root / "avatar.svg").read_bytes()).decode()
+eating = base64.b64encode((root / "avatar-eating.svg").read_bytes()).decode()
 icon = base64.b64encode((root / "icon.svg").read_bytes()).decode()
 
 js = js.replace('img: "avatar.svg"', f'img: "data:image/svg+xml;base64,{avatar}"')
+js = js.replace('src="avatar-eating.svg"', f'src="data:image/svg+xml;base64,{eating}"')
 # No service worker in the single-file build — file:// can't register one.
 js = js.replace(
     'if ("serviceWorker" in navigator) {\n  navigator.serviceWorker.register("sw.js").catch(() => {});\n}\n',

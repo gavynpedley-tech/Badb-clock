@@ -6,7 +6,7 @@
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
-  { id: "food",   label: "Food",      emoji: "🍽️", phrase: "We're going for food",     done: "Time for food!" },
+  { id: "food",   label: "Food",      emoji: "🍽️", phrase: "We're going for food",     done: "Time for food!", arrival: "bagel" },
   { id: "granny", label: "Granny's",  emoji: "👵", phrase: "We're going to Granny's",  done: "We're at Granny's!" },
   { id: "school", label: "School",    emoji: "🏫", phrase: "We're going to school",    done: "We're at school!" },
   { id: "home",   label: "Home",      emoji: "🏠", phrase: "We're going home",         done: "We're home!" },
@@ -152,11 +152,52 @@ function finishTimer() {
   releaseWakeLock();
   stopMusic();
 
+  // Special arrival scenes (only with the drawn avatar, so the close-up
+  // always matches the character who made the journey).
+  if (state.transition.arrival === "bagel" && state.character.img) {
+    $("done-emoji").innerHTML = `<img class="arrival-img" src="avatar-eating.svg" alt="">`;
+    $("done-phrase").textContent = "Yay! Bagel time!";
+    showScreen("screen-done");
+    playChime();
+    setTimeout(playYay, 1400);
+    dropConfetti(["🥯", "⭐", "🎉", "✨", "💛"], 26);
+    return;
+  }
+
   $("done-emoji").innerHTML = `${characterHTML(state.character)}${state.transition.emoji}`;
   $("done-phrase").textContent = state.transition.done;
   showScreen("screen-done");
   playChime();
   dropConfetti();
+}
+
+/* A little cheer: a spoken "Yay!" where speech synthesis exists, plus a
+   quick sparkly run-up so there's always something joyful to hear. */
+function playYay() {
+  try {
+    if ("speechSynthesis" in window) {
+      const yay = new SpeechSynthesisUtterance("Yay!");
+      yay.pitch = 1.8;
+      yay.rate = 1.1;
+      speechSynthesis.speak(yay);
+    }
+  } catch (_) { /* fine without it */ }
+  try {
+    const notes = [659.25, 783.99, 987.77, 1318.5]; // E5 G5 B5 E6
+    notes.forEach((freq, i) => {
+      const t = audioCtx.currentTime + i * 0.09;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.16, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.7);
+    });
+  } catch (_) { /* fine without it */ }
 }
 
 function stopTimer() {
@@ -296,12 +337,11 @@ function playChime() {
 
 /* ---------- calm confetti ---------- */
 
-function dropConfetti() {
+function dropConfetti(pieces = ["⭐", "✨", "🎈", "💛"], count = 18) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const box = $("confetti");
   box.innerHTML = "";
-  const pieces = ["⭐", "✨", "🎈", "💛"];
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < count; i++) {
     const span = document.createElement("span");
     span.textContent = pieces[i % pieces.length];
     span.style.left = `${(i * 137) % 100}%`;

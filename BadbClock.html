@@ -334,6 +334,7 @@ body {
 .walker .char-img { height: 2em; }
 .character-option .char-img { height: 2.1rem; display: block; }
 .done-emoji .char-img { height: 1em; margin-right: 0.08em; }
+.arrival-img { height: clamp(240px, 42vh, 340px); width: auto; display: block; }
 
 /* Respect users who need less motion: freeze the decorative animation,
    keep the position/width transitions that carry the countdown meaning. */
@@ -413,7 +414,7 @@ body {
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
-  { id: "food",   label: "Food",      emoji: "🍽️", phrase: "We're going for food",     done: "Time for food!" },
+  { id: "food",   label: "Food",      emoji: "🍽️", phrase: "We're going for food",     done: "Time for food!", arrival: "bagel" },
   { id: "granny", label: "Granny's",  emoji: "👵", phrase: "We're going to Granny's",  done: "We're at Granny's!" },
   { id: "school", label: "School",    emoji: "🏫", phrase: "We're going to school",    done: "We're at school!" },
   { id: "home",   label: "Home",      emoji: "🏠", phrase: "We're going home",         done: "We're home!" },
@@ -559,11 +560,52 @@ function finishTimer() {
   releaseWakeLock();
   stopMusic();
 
+  // Special arrival scenes (only with the drawn avatar, so the close-up
+  // always matches the character who made the journey).
+  if (state.transition.arrival === "bagel" && state.character.img) {
+    $("done-emoji").innerHTML = `<img class="arrival-img" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8IS0tIENsb3NlLXVwIG9mIEJhZGIgaGFwcGlseSBtdW5jaGluZyBhIGJhZ2VsIChjaGV3aW5nICsgYmFnZWwgYm9iIGFyZQogICAgICAgYW5pbWF0ZWQgd2l0aCBTTUlMIHNvIHRoaXMgd29ya3MgZXZlbiBsb2FkZWQgdGhyb3VnaCBhbiA8aW1nPiB0YWcpIC0tPgoKICA8IS0tIHNwYXJrbGVzIC0tPgogIDxwYXRoIGQ9Ik0xOCAyOCBMIDIwIDMzIEwgMjUgMzUgTCAyMCAzNyBMIDE4IDQyIEwgMTYgMzcgTCAxMSAzNSBMIDE2IDMzIFoiIGZpbGw9IiNmNGM5NGYiLz4KICA8cGF0aCBkPSJNMTAzIDM0IEwgMTA0LjUgMzggTCAxMDggMzkuNSBMIDEwNC41IDQxIEwgMTAzIDQ1IEwgMTAxLjUgNDEgTCA5OCAzOS41IEwgMTAxLjUgMzggWiIgZmlsbD0iI2Y0Yzk0ZiIvPgoKICA8IS0tIGJhY2sgaGFpciAtLT4KICA8cGF0aCBkPSJNNjAgOAogICAgICAgICAgIEMgMzQgOCwgMjIgMjYsIDI0IDQ0CiAgICAgICAgICAgQyAyNC41IDU0LCAyMCA2MCwgMjEgNzAKICAgICAgICAgICBDIDIyIDgwLCAzMCA4MywgMzYgNzkKICAgICAgICAgICBMIDM2IDU4IEwgODQgNTggTCA4NCA3OQogICAgICAgICAgIEMgOTAgODMsIDk4IDgwLCA5OSA3MAogICAgICAgICAgIEMgMTAwIDYwLCA5NS41IDU0LCA5NiA0NAogICAgICAgICAgIEMgOTggMjYsIDg2IDgsIDYwIDggWiIKICAgICAgICBmaWxsPSIjZTJhOTRlIi8+CiAgPHBhdGggZD0iTTI2IDQ2IEMgMjQgNTQsIDIyIDU4LCAyMy41IDY4IEMgMjUgNzQsIDMwIDc1LCAzMyA3MiBDIDI5IDY0LCAzMCA1NCwgMjggNDggWiIgZmlsbD0iI2YwYmU2NiIvPgogIDxwYXRoIGQ9Ik05NCA0NiBDIDk2IDU0LCA5OCA1OCwgOTYuNSA2OCBDIDk1IDc0LCA5MCA3NSwgODcgNzIgQyA5MSA2NCwgOTAgNTQsIDkyIDQ4IFoiIGZpbGw9IiNmMGJlNjYiLz4KCiAgPCEtLSBmYWNlIC0tPgogIDxjaXJjbGUgY3g9IjYwIiBjeT0iNTAiIHI9IjMyIiBmaWxsPSIjZmZkZmM5Ii8+CiAgPGVsbGlwc2UgY3g9IjQxIiBjeT0iNjAiIHJ4PSI3IiByeT0iNC41IiBmaWxsPSIjZjU5Zjk2IiBvcGFjaXR5PSIwLjYiLz4KICA8ZWxsaXBzZSBjeD0iNzkiIGN5PSI2MCIgcng9IjciIHJ5PSI0LjUiIGZpbGw9IiNmNTlmOTYiIG9wYWNpdHk9IjAuNiIvPgoKICA8IS0tIGhhcHB5IGNsb3NlZCBleWVzIC0tPgogIDxwYXRoIGQ9Ik00MCA0OSBRIDQ2IDQyLjUsIDUyIDQ5IiBzdHJva2U9IiM0NjM4MjkiIHN0cm9rZS13aWR0aD0iMi42IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNNjggNDkgUSA3NCA0Mi41LCA4MCA0OSIgc3Ryb2tlPSIjNDYzODI5IiBzdHJva2Utd2lkdGg9IjIuNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CgogIDwhLS0gbm9zZSArIGNoZXdpbmcgbW91dGggLS0+CiAgPHBhdGggZD0iTTU4IDU5IEMgNTkgNjAuNSwgNjEgNjAuNSwgNjIgNTkiIHN0cm9rZT0iI2U4YjQ5YSIgc3Ryb2tlLXdpZHRoPSIxLjYiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxlbGxpcHNlIGN4PSI2MCIgY3k9IjcwIiByeD0iNiIgcnk9IjMuNSIgZmlsbD0iI2E4NWM1NSI+CiAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJyeSIgdmFsdWVzPSIyOzU7MiIgZHVyPSIwLjc1cyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiLz4KICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9ImN5IiB2YWx1ZXM9IjY5OzcxOzY5IiBkdXI9IjAuNzVzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogIDwvZWxsaXBzZT4KCiAgPCEtLSBmcmluZ2UgLS0+CiAgPHBhdGggZD0iTTI4IDQ2CiAgICAgICAgICAgQyAyNiAxOCwgNDIgMTEsIDYwIDExCiAgICAgICAgICAgQyA3OCAxMSwgOTQgMTgsIDkyIDQ2CiAgICAgICAgICAgQyA4OSA0MCwgODcgMzcuNSwgODQuNSA0MAogICAgICAgICAgIEMgODIgMzQuNSwgNzcgMzQsIDc0IDM4CiAgICAgICAgICAgQyA3MSAzMywgNjQgMzMsIDYxIDM3CiAgICAgICAgICAgQyA1OCAzMywgNTEgMzMuNSwgNDguNSAzOAogICAgICAgICAgIEMgNDUgMzQuNSwgNDEgMzUuNSwgMzkuNSA0MAogICAgICAgICAgIEMgMzYgMzcuNSwgMzMgNDAsIDI4IDQ2IFoiCiAgICAgICAgZmlsbD0iI2U4YjA0YiIvPgogIDxwYXRoIGQ9Ik00MiAxNSBDIDUwIDEyLjUsIDcwIDEyLjUsIDc4IDE1IEMgNzAgMTcsIDUwIDE3LCA0MiAxNSBaIiBmaWxsPSIjZjJjNjZkIiBvcGFjaXR5PSIwLjgiLz4KCiAgPCEtLSBkdWNrIGNsaXAgLS0+CiAgPGNpcmNsZSBjeD0iODciIGN5PSIxNyIgcj0iMi4yIiBmaWxsPSIjZTA1YThhIi8+CiAgPGNpcmNsZSBjeD0iOTMiIGN5PSIxNCIgcj0iNC40IiBmaWxsPSIjZjdkMjRiIi8+CiAgPGNpcmNsZSBjeD0iOTQuNyIgY3k9IjEzIiByPSIwLjgiIGZpbGw9IiM0NjM4MjkiLz4KICA8cGF0aCBkPSJNOTcuMiAxNCBMIDEwMCAxNSBMIDk3LjIgMTYuMSBaIiBmaWxsPSIjZTg4NjJmIi8+CgogIDwhLS0gYmFnZWwgKyBoYW5kcywgZ2VudGx5IHJvY2tpbmcgYXMgc2hlIG11bmNoZXMgLS0+CiAgPGc+CiAgICA8YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InJvdGF0ZSIKICAgICAgICAgICAgICAgICAgICAgIHZhbHVlcz0iLTMgNjAgOTQ7IDMgNjAgOTQ7IC0zIDYwIDk0IgogICAgICAgICAgICAgICAgICAgICAgZHVyPSIxLjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogICAgPCEtLSBiYWdlbDogdG9ydXMgd2l0aCBhIGJpdGUgdGFrZW4gb3V0IChmaWxsLXJ1bGUgZXZlbm9kZCBjdXRzIGJvdGgKICAgICAgICAgdGhlIG1pZGRsZSBob2xlIGFuZCB0aGUgYml0ZSBub3RjaCkgLS0+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNkZGExNWUiCiAgICAgICAgICBkPSJNNjAgNzcgYSAxNyAxNyAwIDEgMCAwLjAwMSAwIFoKICAgICAgICAgICAgIE02MCA4Ny41IGEgNi41IDYuNSAwIDEgMCAwLjAwMSAwIFoKICAgICAgICAgICAgIE03MyA3NSBhIDcgNyAwIDEgMCAwLjAwMSAwIFoiLz4KICAgIDxwYXRoIGQ9Ik00NiA4NyBDIDQ5IDgwLjUsIDU1IDc3LjUsIDYwIDc3LjUiIHN0cm9rZT0iI2U5Yjg3NyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDwhLS0gc2VzYW1lIHNlZWRzIC0tPgogICAgPGVsbGlwc2UgY3g9IjQ5IiBjeT0iOTAiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSIjZjdlYWQyIiB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgNDkgOTApIi8+CiAgICA8ZWxsaXBzZSBjeD0iNTUiIGN5PSI4MiIgcng9IjEuOCIgcnk9IjEiIGZpbGw9IiNmN2VhZDIiIHRyYW5zZm9ybT0icm90YXRlKDIwIDU1IDgyKSIvPgogICAgPGVsbGlwc2UgY3g9IjY2IiBjeT0iMTA2IiByeD0iMS44IiByeT0iMSIgZmlsbD0iI2Y3ZWFkMiIgdHJhbnNmb3JtPSJyb3RhdGUoLTE1IDY2IDEwNikiLz4KICAgIDxlbGxpcHNlIGN4PSI1MiIgY3k9IjEwMyIgcng9IjEuOCIgcnk9IjEiIGZpbGw9IiNmN2VhZDIiIHRyYW5zZm9ybT0icm90YXRlKDQwIDUyIDEwMykiLz4KICAgIDxlbGxpcHNlIGN4PSI3MiIgY3k9Ijk3IiByeD0iMS44IiByeT0iMSIgZmlsbD0iI2Y3ZWFkMiIgdHJhbnNmb3JtPSJyb3RhdGUoMTAgNzIgOTcpIi8+CiAgICA8IS0tIGhhbmRzIC0tPgogICAgPGNpcmNsZSBjeD0iNDQiIGN5PSI5NiIgcj0iNy41IiBmaWxsPSIjZmZkZmM5Ii8+CiAgICA8Y2lyY2xlIGN4PSI3NiIgY3k9Ijk4IiByPSI3LjUiIGZpbGw9IiNmZmRmYzkiLz4KICA8L2c+Cjwvc3ZnPgo=" alt="">`;
+    $("done-phrase").textContent = "Yay! Bagel time!";
+    showScreen("screen-done");
+    playChime();
+    setTimeout(playYay, 1400);
+    dropConfetti(["🥯", "⭐", "🎉", "✨", "💛"], 26);
+    return;
+  }
+
   $("done-emoji").innerHTML = `${characterHTML(state.character)}${state.transition.emoji}`;
   $("done-phrase").textContent = state.transition.done;
   showScreen("screen-done");
   playChime();
   dropConfetti();
+}
+
+/* A little cheer: a spoken "Yay!" where speech synthesis exists, plus a
+   quick sparkly run-up so there's always something joyful to hear. */
+function playYay() {
+  try {
+    if ("speechSynthesis" in window) {
+      const yay = new SpeechSynthesisUtterance("Yay!");
+      yay.pitch = 1.8;
+      yay.rate = 1.1;
+      speechSynthesis.speak(yay);
+    }
+  } catch (_) { /* fine without it */ }
+  try {
+    const notes = [659.25, 783.99, 987.77, 1318.5]; // E5 G5 B5 E6
+    notes.forEach((freq, i) => {
+      const t = audioCtx.currentTime + i * 0.09;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.16, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.7);
+    });
+  } catch (_) { /* fine without it */ }
 }
 
 function stopTimer() {
@@ -703,12 +745,11 @@ function playChime() {
 
 /* ---------- calm confetti ---------- */
 
-function dropConfetti() {
+function dropConfetti(pieces = ["⭐", "✨", "🎈", "💛"], count = 18) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const box = $("confetti");
   box.innerHTML = "";
-  const pieces = ["⭐", "✨", "🎈", "💛"];
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < count; i++) {
     const span = document.createElement("span");
     span.textContent = pieces[i % pieces.length];
     span.style.left = `${(i * 137) % 100}%`;
