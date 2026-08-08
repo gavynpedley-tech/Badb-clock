@@ -119,6 +119,29 @@ function foodSVG(food) {
   return `<svg class="food-svg" viewBox="0 0 40 40" aria-hidden="true">${FOOD_ART[food.id]}</svg>`;
 }
 
+/* Drawn art for transitions where an emoji doesn't match the real thing —
+   like the shower, which is a cubicle with a glass door, not a bare head. */
+const TRANSITION_ART = {
+  shower: `
+    <rect x="6" y="4" width="28" height="31" rx="2.5" fill="#e3edf4"/>
+    <path d="M6 14 H34 M6 24 H34 M20 4 V35" stroke="#cdddea" stroke-width="1"/>
+    <path d="M13 4 V7" stroke="#8fa8c4" stroke-width="2" stroke-linecap="round"/>
+    <rect x="9" y="7" width="9" height="3.6" rx="1.8" fill="#8fa8c4"/>
+    <circle cx="10.5" cy="14" r="1" fill="#6fa8d4"/><circle cx="13.5" cy="13" r="1" fill="#6fa8d4"/>
+    <circle cx="16.5" cy="14" r="1" fill="#6fa8d4"/><circle cx="12" cy="18" r="1" fill="#6fa8d4"/>
+    <circle cx="15" cy="17.5" r="1" fill="#6fa8d4"/><circle cx="13.5" cy="22" r="1" fill="#6fa8d4"/>
+    <circle cx="11" cy="26" r="1" fill="#6fa8d4"/><circle cx="16" cy="25.5" r="1" fill="#6fa8d4"/>
+    <rect x="8" y="6" width="24" height="29" rx="2" fill="#cfe4f2" opacity="0.45" stroke="#9fc2e0" stroke-width="1.4"/>
+    <rect x="28.5" y="18" width="2.2" height="7" rx="1.1" fill="#7f9bb8"/>
+    <rect x="5" y="34" width="30" height="3.5" rx="1.75" fill="#f6fafc" stroke="#cfd7e0" stroke-width="1"/>`,
+};
+
+function transitionIconHTML(t) {
+  return TRANSITION_ART[t.id]
+    ? `<svg class="food-svg" viewBox="0 0 40 40" aria-hidden="true">${TRANSITION_ART[t.id]}</svg>`
+    : t.emoji;
+}
+
 const MINUTES = [1, 2, 3, 5, 10, 15];
 const CHARACTERS = [
   { id: "badb", img: "avatar.svg" },
@@ -165,14 +188,14 @@ function buildChooseScreen() {
   TRANSITIONS.forEach((t) => {
     const card = document.createElement("button");
     card.className = "transition-card";
-    card.innerHTML = `<span class="emoji">${t.emoji}</span><span class="label">${t.label}</span>`;
+    card.innerHTML = `<span class="emoji">${transitionIconHTML(t)}</span><span class="label">${t.label}</span>`;
     card.addEventListener("click", () => {
       state.transition = t;
       state.food = null;
       if (t.id === "food") {
         showScreen("screen-food-category");
       } else {
-        $("time-emoji").textContent = t.emoji;
+        $("time-emoji").innerHTML = transitionIconHTML(t);
         $("time-title").textContent = t.phrase;
         showScreen("screen-time");
       }
@@ -248,7 +271,7 @@ function startTimer(seconds) {
   $("timer-phrase").textContent = state.food ? state.food.phrase : state.transition.phrase;
   $("walker-emoji").innerHTML = characterHTML(state.character);
   if (state.food) $("destination-emoji").innerHTML = foodSVG(state.food);
-  else $("destination-emoji").textContent = state.transition.emoji;
+  else $("destination-emoji").innerHTML = transitionIconHTML(state.transition);
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
   $("progress-fill").classList.remove("nearly");
@@ -307,7 +330,7 @@ function finishTimer() {
     return;
   }
 
-  $("done-emoji").innerHTML = `${characterHTML(state.character)}${state.transition.emoji}`;
+  $("done-emoji").innerHTML = `${characterHTML(state.character)}${transitionIconHTML(state.transition)}`;
   $("done-phrase").textContent = state.transition.done;
   showScreen("screen-done");
   playChime();

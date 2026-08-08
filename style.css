@@ -209,7 +209,7 @@ body {
   position: absolute;
   bottom: 14%;
   left: 4%;
-  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  font-size: clamp(3rem, 9vw, 4.4rem);
   line-height: 1;
   transition: left 1s linear;
   z-index: 2;
@@ -224,7 +224,7 @@ body {
   position: absolute;
   bottom: 12%;
   right: 4%;
-  font-size: clamp(3.4rem, 11vw, 5.2rem);
+  font-size: clamp(4.4rem, 14vw, 6.6rem);
   line-height: 1;
   z-index: 1;
 }
