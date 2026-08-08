@@ -387,6 +387,7 @@ body {
   <div id="time-left" class="time-left">0:00</div>
   <div class="timer-controls">
     <button id="pause-btn" class="control-btn">⏸ Pause</button>
+    <button id="music-btn" class="control-btn">🎵 Music on</button>
   </div>
 </section>
 
@@ -524,6 +525,7 @@ function startTimer(seconds) {
   renderTick();
   showScreen("screen-timer");
   requestWakeLock();
+  startMusic();
 
   clearInterval(state.intervalId);
   state.intervalId = setInterval(() => {
@@ -555,6 +557,7 @@ function finishTimer() {
   clearInterval(state.intervalId);
   state.intervalId = null;
   releaseWakeLock();
+  stopMusic();
 
   $("done-emoji").innerHTML = `${characterHTML(state.character)}${state.transition.emoji}`;
   $("done-phrase").textContent = state.transition.done;
@@ -567,6 +570,104 @@ function stopTimer() {
   clearInterval(state.intervalId);
   state.intervalId = null;
   releaseWakeLock();
+  stopMusic();
+}
+
+/* ---------- gentle looping background music ----------
+   A tiny music box waltzing through C – Am – F – G, generated with the
+   Web Audio API so there are no audio files and it works offline. It sits
+   quietly under the countdown and stops before the arrival chime. */
+
+const MUSIC_TEMPO = 68;           // beats per minute — a calm walking pace
+const MUSIC_LOOP_BEATS = 32;      // 8 bars of 4 beats
+const MUSIC_EVENTS = (() => {
+  const events = [];
+  // soft bass note at the start of each bar: C C Am Am F F G G
+  [48, 48, 45, 45, 53, 53, 55, 55].forEach((midi, bar) => {
+    events.push({ beat: bar * 4, midi, beats: 3.6, gain: 0.07 });
+  });
+  // music-box arpeggio, one plink per beat
+  const arps = [
+    [64, 67, 72, 67], [64, 67, 72, 67],   // C:  E4 G4 C5 G4
+    [64, 69, 72, 69], [64, 69, 72, 69],   // Am: E4 A4 C5 A4
+    [65, 69, 72, 69], [65, 69, 72, 69],   // F:  F4 A4 C5 A4
+    [62, 67, 71, 67], [62, 67, 71, 67],   // G:  D4 G4 B4 G4
+  ];
+  arps.forEach((bar, b) => bar.forEach((midi, i) => {
+    events.push({ beat: b * 4 + i, midi, beats: 1.3, gain: 0.045 });
+  }));
+  // a sparse, singable melody floating on top
+  [
+    [0, 76, 1], [1, 79, 1], [2, 72, 2],
+    [8, 69, 1], [9, 72, 1], [10, 76, 2],
+    [16, 77, 1], [17, 76, 1], [18, 72, 2],
+    [24, 74, 1], [25, 71, 1], [26, 74, 2],
+  ].forEach(([beat, midi, beats]) => events.push({ beat, midi, beats, gain: 0.085 }));
+  return events;
+})();
+
+let musicOn = localStorage.getItem("badb-music") !== "off";
+const music = { master: null, schedulerId: null, startTime: 0, nextBeat: 0 };
+
+function startMusic() {
+  if (!musicOn) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    stopMusic(true);
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 2600;
+    music.master = audioCtx.createGain();
+    music.master.gain.value = 1;
+    music.master.connect(filter).connect(audioCtx.destination);
+
+    const spb = 60 / MUSIC_TEMPO;
+    music.startTime = audioCtx.currentTime + 0.15;
+    music.nextBeat = 0;
+    music.schedulerId = setInterval(() => {
+      // schedule everything due in the next half-second
+      while (music.startTime + music.nextBeat * spb < audioCtx.currentTime + 0.55) {
+        const loopBeat = music.nextBeat % MUSIC_LOOP_BEATS;
+        const t = music.startTime + music.nextBeat * spb;
+        MUSIC_EVENTS.forEach((ev) => {
+          if (ev.beat === loopBeat) playMusicNote(t, ev.midi, ev.beats * spb, ev.gain);
+        });
+        music.nextBeat += 1;
+      }
+    }, 150);
+  } catch (_) {
+    /* no audio — the timer is fully usable in silence */
+  }
+}
+
+function playMusicNote(t, midi, dur, peak) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(peak, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.5);
+  osc.connect(gain).connect(music.master);
+  osc.start(t);
+  osc.stop(t + dur + 0.6);
+}
+
+function stopMusic(immediate) {
+  clearInterval(music.schedulerId);
+  music.schedulerId = null;
+  if (music.master) {
+    const m = music.master;
+    music.master = null;
+    if (immediate) {
+      m.disconnect();
+    } else {
+      m.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
+      setTimeout(() => m.disconnect(), 600);
+    }
+  }
 }
 
 /* ---------- gentle chime (Web Audio, no audio files needed) ---------- */
@@ -649,7 +750,22 @@ $("pause-btn").addEventListener("click", () => {
   state.paused = !state.paused;
   $("pause-btn").textContent = state.paused ? "▶ Go" : "⏸ Pause";
   $("walker").classList.toggle("walking", !state.paused);
+  if (state.paused) stopMusic();
+  else startMusic();
 });
+
+function updateMusicBtn() {
+  $("music-btn").textContent = musicOn ? "🎵 Music on" : "🎵 Music off";
+}
+
+$("music-btn").addEventListener("click", () => {
+  musicOn = !musicOn;
+  localStorage.setItem("badb-music", musicOn ? "on" : "off");
+  updateMusicBtn();
+  if (!musicOn) stopMusic();
+  else if (state.intervalId && !state.paused) startMusic();
+});
+updateMusicBtn();
 
 $("again-btn").addEventListener("click", () => startTimer(state.totalSeconds));
 

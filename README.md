@@ -9,6 +9,8 @@ An autism-friendly **visual countdown timer for transitions**, built for one par
 3. **The countdown** — an animated character walks across a calm scene toward the destination as the time runs down. The default character is a hand-drawn cartoon avatar of Badb herself (`avatar.svg` — wavy golden hair, blue eyes, rosy cheeks, yellow scarf, duck hair clip), with emoji alternatives in the picker. A green progress bar shrinks alongside, and in the last 10 seconds everything gently shifts to "Nearly there!".
 4. **Time's up** — the character arrives, a soft rising chime plays twice, and a calm sprinkle of stars celebrates the arrival.
 
+While the countdown runs, a quiet music-box loop plays underneath (think kid-friendly elevator music — a slow C–Am–F–G waltz generated with the Web Audio API, so no audio files are needed and it works offline). The 🎵 button on the timer screen turns it off for quiet days, and the choice is remembered.
+
 ## Design principles
 
 - **Predictable**: the same four steps every time, no surprises, no ads, no notifications.
