@@ -23,6 +23,23 @@
   </div>
 </section>
 
+<!-- Screen 1b: dinner or dessert? (food transition only) -->
+<section id="screen-food-category" class="screen">
+  <button id="back-category" class="back-btn" aria-label="Go back">←</button>
+  <h1 class="screen-title">Dinner or dessert?</h1>
+  <div class="card-grid two">
+    <button class="transition-card" id="cat-dinner"><span class="emoji">🍽️</span><span class="label">Dinner</span></button>
+    <button class="transition-card" id="cat-dessert"><span class="emoji">🍨</span><span class="label">Dessert</span></button>
+  </div>
+</section>
+
+<!-- Screen 1c: pick the food -->
+<section id="screen-food" class="screen">
+  <button id="back-food" class="back-btn" aria-label="Go back">←</button>
+  <h1 class="screen-title">What are we having?</h1>
+  <div id="food-grid" class="card-grid"></div>
+</section>
+
 <!-- Screen 2: choose the time -->
 <section id="screen-time" class="screen">
   <button id="back-to-choose" class="back-btn" aria-label="Go back">←</button>

@@ -324,7 +324,12 @@ body {
 .walker .char-img { height: 2em; }
 .character-option .char-img { height: 2.1rem; display: block; }
 .done-emoji .char-img { height: 1em; margin-right: 0.08em; }
-.arrival-img { height: clamp(240px, 42vh, 340px); width: auto; display: block; }
+.arrival-svg { height: clamp(240px, 42vh, 340px); width: auto; display: block; }
+
+/* drawn food pictures, sized like the emoji they sit beside */
+.food-svg { height: 1em; width: auto; display: inline-block; vertical-align: baseline; }
+.transition-card .emoji .food-svg { height: clamp(2.6rem, 8vw, 3.6rem); display: block; }
+.card-grid.two { max-width: 460px; }
 
 /* Respect users who need less motion: freeze the decorative animation,
    keep the position/width transitions that carry the countdown meaning. */
