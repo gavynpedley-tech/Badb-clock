@@ -20,8 +20,30 @@
   <div class="settings-row">
     <span class="settings-label">Who is going?</span>
     <div id="character-picker" class="character-picker"></div>
+    <button id="videos-btn" class="admin-btn">🎬 Videos</button>
   </div>
 </section>
+
+<!-- Screen: instant videos (rescue player) -->
+<section id="screen-videos" class="screen">
+  <button id="back-videos" class="back-btn" aria-label="Go back">←</button>
+  <h1 class="screen-title">Videos</h1>
+  <div id="video-grid" class="video-grid"></div>
+  <div class="settings-row">
+    <div class="food-admin">
+      <label class="admin-btn">＋ Add a video<input type="file" id="video-input" accept="video/*" hidden></label>
+      <button id="video-remove-btn" class="admin-btn" hidden>🗑 Remove</button>
+      <a class="admin-btn" href="https://www.youtube.com/feed/downloads">▶ YouTube downloads</a>
+    </div>
+    <span id="video-hint" class="settings-label"></span>
+  </div>
+</section>
+
+<!-- fullscreen instant player -->
+<div id="video-player" class="video-overlay" hidden>
+  <video id="video-el" playsinline loop></video>
+  <button id="video-close" class="back-btn" aria-label="Close video">✕</button>
+</div>
 
 <!-- Screen 1b: dinner or dessert? (food transition only) -->
 <section id="screen-food-category" class="screen">

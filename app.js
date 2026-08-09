@@ -132,13 +132,51 @@ function foodHTML(food) {
    name it and file it under dinner/dessert. Nothing leaves the device. */
 
 let customFoods = [];
+let customVideos = [];
 
 function foodsDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open("badb-clock", 1);
-    req.onupgradeneeded = () => req.result.createObjectStore("foods", { keyPath: "id" });
+    const req = indexedDB.open("badb-clock", 2);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("foods")) db.createObjectStore("foods", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("videos")) db.createObjectStore("videos", { keyPath: "id" });
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+  });
+}
+
+async function loadCustomVideos() {
+  try {
+    const db = await foodsDB();
+    customVideos = await new Promise((resolve, reject) => {
+      const req = db.transaction("videos").objectStore("videos").getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (_) {
+    customVideos = [];
+  }
+}
+
+async function saveCustomVideo(video) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("videos", "readwrite");
+    tx.objectStore("videos").put(video);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteCustomVideo(id) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("videos", "readwrite");
+    tx.objectStore("videos").delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
   });
 }
 
@@ -1011,6 +1049,121 @@ function buildEditFoodList() {
   });
 }
 
+/* ---------- instant videos: import once, play in one tap ----------
+   Videos are stored whole in IndexedDB, so playback starts instantly
+   from local storage — no network, no buffering, no adverts. */
+
+let removingVideos = false;
+
+function videoThumb(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const v = document.createElement("video");
+    const done = (thumb) => { URL.revokeObjectURL(url); resolve(thumb); };
+    const timeout = setTimeout(() => done(null), 5000);
+    v.muted = true;
+    v.preload = "auto";
+    v.onloadeddata = () => { v.currentTime = Math.min(1, (v.duration || 2) / 2); };
+    v.onseeked = () => {
+      clearTimeout(timeout);
+      const canvas = document.createElement("canvas");
+      canvas.width = 320;
+      canvas.height = 180;
+      const scale = Math.max(320 / v.videoWidth, 180 / v.videoHeight);
+      const w = v.videoWidth * scale;
+      const h = v.videoHeight * scale;
+      canvas.getContext("2d").drawImage(v, (320 - w) / 2, (180 - h) / 2, w, h);
+      done(canvas.toDataURL("image/jpeg", 0.8));
+    };
+    v.onerror = () => { clearTimeout(timeout); done(null); };
+    v.src = url;
+  });
+}
+
+function buildVideoGrid() {
+  const grid = $("video-grid");
+  grid.innerHTML = "";
+  grid.classList.toggle("removing", removingVideos);
+  customVideos.forEach((v) => {
+    const tile = document.createElement("button");
+    tile.className = "video-tile";
+    tile.innerHTML = `
+      ${v.thumb ? `<img src="${v.thumb}" alt="">` : `<span class="placeholder">🎬</span>`}
+      <span class="play-badge">▶️</span>
+      <span class="name">${v.label}</span>`;
+    tile.addEventListener("click", async () => {
+      if (removingVideos) {
+        if (!confirm(`Remove ${v.label}?`)) return;
+        try { await deleteCustomVideo(v.id); } catch (_) { /* remove for the session anyway */ }
+        customVideos = customVideos.filter((x) => x.id !== v.id);
+        removingVideos = customVideos.length > 0 && removingVideos;
+        buildVideoGrid();
+      } else {
+        openVideo(v);
+      }
+    });
+    grid.appendChild(tile);
+  });
+  $("video-remove-btn").hidden = customVideos.length === 0;
+  $("video-remove-btn").textContent = removingVideos ? "✓ Done" : "🗑 Remove";
+  $("video-hint").textContent = customVideos.length === 0
+    ? "Add favourite videos here in a quiet moment — after that they play instantly, even offline."
+    : "";
+}
+
+let playingURL = null;
+
+function openVideo(v) {
+  playingURL = URL.createObjectURL(v.blob);
+  const el = $("video-el");
+  el.src = playingURL;
+  $("video-player").hidden = false;
+  el.play().catch(() => {});
+}
+
+function closeVideo() {
+  const el = $("video-el");
+  el.pause();
+  el.removeAttribute("src");
+  el.load();
+  if (playingURL) URL.revokeObjectURL(playingURL);
+  playingURL = null;
+  $("video-player").hidden = true;
+}
+
+$("videos-btn").addEventListener("click", () => {
+  removingVideos = false;
+  buildVideoGrid();
+  showScreen("screen-videos");
+});
+$("back-videos").addEventListener("click", () => showScreen("screen-choose"));
+$("video-close").addEventListener("click", closeVideo);
+$("video-remove-btn").addEventListener("click", () => {
+  removingVideos = !removingVideos;
+  buildVideoGrid();
+});
+
+$("video-input").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  $("video-hint").textContent = "Adding… (big films take a minute)";
+  const thumb = await videoThumb(file);
+  const video = {
+    id: `video-${Date.now()}`,
+    label: file.name.replace(/\.[^.]+$/, ""),
+    blob: file,
+    thumb,
+  };
+  try {
+    await saveCustomVideo(video);
+  } catch (_) {
+    $("video-hint").textContent = "Couldn't store that video (not enough space?) — it will play until the app closes.";
+  }
+  customVideos.push(video);
+  buildVideoGrid();
+});
+
 $("add-food-btn").addEventListener("click", () => openAddFood(null));
 $("edit-foods-btn").addEventListener("click", () => {
   buildEditFoodList();
@@ -1025,6 +1178,7 @@ $("back-edit-foods").addEventListener("click", () => {
 buildChooseScreen();
 buildTimeScreen();
 loadCustomFoods();
+loadCustomVideos();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
