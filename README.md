@@ -36,3 +36,4 @@ It's a plain static web app — no build step, no dependencies.
 - A recorded voice ("Two more minutes!") in a familiar voice
 - Custom transitions added by the parent
 - Gentle vibration cue on arrival (for noisy places)
+- **Rescue videos**: one-tap, zero-lag playback of a small set of her favourite videos, stored on the phone so nothing streams, buffers or shows ads — for grabbing attention fast in the moments just before a meltdown. Big tap targets, starts instantly, works offline.
