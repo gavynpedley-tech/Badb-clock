@@ -457,6 +457,8 @@ function startTimer(seconds) {
   $("walker-emoji").innerHTML = characterHTML(state.character);
   if (state.food) $("destination-emoji").innerHTML = foodHTML(state.food);
   else $("destination-emoji").innerHTML = transitionIconHTML(state.transition);
+  // scene-style destinations (like the dance party) get extra room
+  $("destination").classList.toggle("huge", !state.food && state.transition.id === "disco");
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
   $("progress-fill").classList.remove("nearly");

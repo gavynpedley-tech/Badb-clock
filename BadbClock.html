@@ -238,6 +238,7 @@ body {
   line-height: 1;
   z-index: 1;
 }
+.destination.huge { font-size: clamp(7rem, 24vw, 11rem); bottom: 10%; }
 .destination.nearly span { display: inline-block; animation: gentle-pulse 1.6s ease-in-out infinite; }
 @keyframes gentle-pulse {
   0%, 100% { transform: scale(1); }
@@ -1041,6 +1042,8 @@ function startTimer(seconds) {
   $("walker-emoji").innerHTML = characterHTML(state.character);
   if (state.food) $("destination-emoji").innerHTML = foodHTML(state.food);
   else $("destination-emoji").innerHTML = transitionIconHTML(state.transition);
+  // scene-style destinations (like the dance party) get extra room
+  $("destination").classList.toggle("huge", !state.food && state.transition.id === "disco");
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
   $("progress-fill").classList.remove("nearly");
