@@ -146,6 +146,41 @@ body {
 }
 .time-btn:active { transform: scale(0.95); border-color: var(--accent); }
 
+.custom-time {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 8px 10px 8px 20px;
+}
+.custom-label { font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+.mini-input {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 8px 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  outline: none;
+}
+.mini-input:focus { border-color: var(--accent); }
+.custom-row .control-btn { padding: 10px 20px; box-shadow: none; background: var(--accent); color: #fff; }
+
 /* ---------- Screen 3: countdown scene ---------- */
 
 #screen-timer { justify-content: center; gap: 14px; }

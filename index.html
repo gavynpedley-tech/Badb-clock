@@ -83,6 +83,18 @@
   </div>
   <h2 class="screen-subtitle">How long?</h2>
   <div id="time-grid" class="time-grid"></div>
+  <div class="custom-time">
+    <div class="custom-row">
+      <span class="custom-label">⏱ Minutes</span>
+      <input type="number" id="custom-minutes" class="mini-input" min="1" max="720" inputmode="numeric" placeholder="20">
+      <button id="custom-minutes-go" class="control-btn">Go</button>
+    </div>
+    <div class="custom-row">
+      <span class="custom-label">🕗 Finish at</span>
+      <input type="time" id="custom-until" class="mini-input">
+      <button id="custom-until-go" class="control-btn">Go</button>
+    </div>
+  </div>
 </section>
 
 <!-- Screen 3: the countdown scene -->

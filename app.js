@@ -323,7 +323,7 @@ function transitionIconHTML(t) {
     : t.emoji;
 }
 
-const MINUTES = [1, 2, 3, 5, 10, 15];
+const MINUTES = [1, 2, 3, 5, 10, 15, 30, 45, 60];
 const CHARACTERS = [
   { id: "badb", img: "avatar.svg" },
   { id: "kid", emoji: "🧒" },
@@ -479,9 +479,12 @@ function startTimer(seconds) {
 }
 
 function renderTick() {
-  const m = Math.floor(state.remaining / 60);
+  const h = Math.floor(state.remaining / 3600);
+  const m = Math.floor((state.remaining % 3600) / 60);
   const s = state.remaining % 60;
-  $("time-left").textContent = `${m}:${String(s).padStart(2, "0")}`;
+  $("time-left").textContent = h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+    : `${m}:${String(s).padStart(2, "0")}`;
 
   const progress = 1 - state.remaining / state.totalSeconds;
   // Walker travels from 4% to ~78% so it stops beside the destination.
@@ -769,6 +772,22 @@ function releaseWakeLock() {
 $("back-to-choose").addEventListener("click", () =>
   showScreen(state.food ? "screen-food" : "screen-choose")
 );
+
+$("custom-minutes-go").addEventListener("click", () => {
+  const m = parseInt($("custom-minutes").value, 10);
+  if (m >= 1 && m <= 720) startTimer(m * 60);
+});
+
+$("custom-until-go").addEventListener("click", () => {
+  const value = $("custom-until").value; // "HH:MM"
+  if (!value) return;
+  const [hh, mm] = value.split(":").map(Number);
+  const target = new Date();
+  target.setHours(hh, mm, 0, 0);
+  let diff = target.getTime() - Date.now();
+  if (diff <= 0) diff += 24 * 3600 * 1000; // that time already passed → tomorrow
+  startTimer(Math.round(diff / 1000));
+});
 
 $("cancel-timer").addEventListener("click", () => {
   stopTimer();

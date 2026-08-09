@@ -156,6 +156,41 @@ body {
 }
 .time-btn:active { transform: scale(0.95); border-color: var(--accent); }
 
+.custom-time {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 8px 10px 8px 20px;
+}
+.custom-label { font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+.mini-input {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 8px 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  outline: none;
+}
+.mini-input:focus { border-color: var(--accent); }
+.custom-row .control-btn { padding: 10px 20px; box-shadow: none; background: var(--accent); color: #fff; }
+
 /* ---------- Screen 3: countdown scene ---------- */
 
 #screen-timer { justify-content: center; gap: 14px; }
@@ -545,6 +580,18 @@ body {
   </div>
   <h2 class="screen-subtitle">How long?</h2>
   <div id="time-grid" class="time-grid"></div>
+  <div class="custom-time">
+    <div class="custom-row">
+      <span class="custom-label">⏱ Minutes</span>
+      <input type="number" id="custom-minutes" class="mini-input" min="1" max="720" inputmode="numeric" placeholder="20">
+      <button id="custom-minutes-go" class="control-btn">Go</button>
+    </div>
+    <div class="custom-row">
+      <span class="custom-label">🕗 Finish at</span>
+      <input type="time" id="custom-until" class="mini-input">
+      <button id="custom-until-go" class="control-btn">Go</button>
+    </div>
+  </div>
 </section>
 
 <!-- Screen 3: the countdown scene -->
@@ -908,7 +955,7 @@ function transitionIconHTML(t) {
     : t.emoji;
 }
 
-const MINUTES = [1, 2, 3, 5, 10, 15];
+const MINUTES = [1, 2, 3, 5, 10, 15, 30, 45, 60];
 const CHARACTERS = [
   { id: "badb", img: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAxMTIiPgogIDwhLS0gQmFkYjogd2F2eSBnb2xkZW4gaGFpciB3aXRoIGEgZnJpbmdlLCByb3N5IGNoZWVrcywgYmx1ZSB0b3AsIHllbGxvdyBzY2FyZiAtLT4KICA8IS0tIGJhY2sgaGFpciAoYmVoaW5kIGV2ZXJ5dGhpbmcpIC0tPgogIDxwYXRoIGQ9Ik00MCA2CiAgICAgICAgICAgQyAyMiA2LCAxNCAyMCwgMTUgMzQKICAgICAgICAgICBDIDE1LjUgNDIsIDEyIDQ2LCAxMyA1NAogICAgICAgICAgIEMgMTQgNjIsIDIwIDY0LCAyNCA2MQogICAgICAgICAgIEMgMjEgNjUsIDI1IDcwLCAzMCA2NwogICAgICAgICAgIEwgMzAgNTIgTCA1MCA1MiBMIDUwIDY3CiAgICAgICAgICAgQyA1NSA3MCwgNTkgNjUsIDU2IDYxCiAgICAgICAgICAgQyA2MCA2NCwgNjYgNjIsIDY3IDU0CiAgICAgICAgICAgQyA2OCA0NiwgNjQuNSA0MiwgNjUgMzQKICAgICAgICAgICBDIDY2IDIwLCA1OCA2LCA0MCA2IFoiCiAgICAgICAgZmlsbD0iI2UyYTk0ZSIvPgogIDxwYXRoIGQ9Ik0xNyAzNiBDIDE1IDQ0LCAxMyA0OCwgMTQuNSA1NSBDIDE2IDYwLCAyMCA2MSwgMjMgNTggQyAxOSA1MiwgMjAgNDQsIDE5IDM4IFoiIGZpbGw9IiNmMGJlNjYiLz4KICA8cGF0aCBkPSJNNjMgMzYgQyA2NSA0NCwgNjcgNDgsIDY1LjUgNTUgQyA2NCA2MCwgNjAgNjEsIDU3IDU4IEMgNjEgNTIsIDYwIDQ0LCA2MSAzOCBaIiBmaWxsPSIjZjBiZTY2Ii8+CgogIDwhLS0gbGVncyBpbiB3aGl0ZSB0aWdodHMgLS0+CiAgPHJlY3QgeD0iMzAiIHk9Ijg0IiB3aWR0aD0iOCIgaGVpZ2h0PSIyMCIgcng9IjQiIGZpbGw9IiNmYWYzZjYiLz4KICA8cmVjdCB4PSI0MiIgeT0iODQiIHdpZHRoPSI4IiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iI2ZhZjNmNiIvPgogIDxlbGxpcHNlIGN4PSIzNCIgY3k9IjEwNiIgcng9IjYiIHJ5PSI0IiBmaWxsPSIjYzg2YTgwIi8+CiAgPGVsbGlwc2UgY3g9IjQ2IiBjeT0iMTA2IiByeD0iNiIgcnk9IjQiIGZpbGw9IiNjODZhODAiLz4KCiAgPCEtLSBhcm1zIChwaW5rIHNsZWV2ZXMpIC0tPgogIDxyZWN0IHg9IjE4IiB5PSI1OCIgd2lkdGg9IjkiIGhlaWdodD0iMjYiIHJ4PSI0LjUiIGZpbGw9IiNmM2IzY2EiLz4KICA8cmVjdCB4PSI1MyIgeT0iNTgiIHdpZHRoPSI5IiBoZWlnaHQ9IjI2IiByeD0iNC41IiBmaWxsPSIjZjNiM2NhIi8+CiAgPGNpcmNsZSBjeD0iMjIuNSIgY3k9Ijg2IiByPSI0IiBmaWxsPSIjZmZkZmM5Ii8+CiAgPGNpcmNsZSBjeD0iNTcuNSIgY3k9Ijg2IiByPSI0IiBmaWxsPSIjZmZkZmM5Ii8+CgogIDwhLS0gcGluayBkcmVzcywgZmxhcmVkIHdpdGggYSBsaWdodGVyIGhlbSAtLT4KICA8cGF0aCBkPSJNMjggNTYgQyAyOCA1MiwgNTIgNTIsIDUyIDU2IEwgNTggODUgQyA1OSA5MCwgMjEgOTAsIDIyIDg1IFoiIGZpbGw9IiNlZThmYjIiLz4KICA8cGF0aCBkPSJNMjIuNiA4MyBMIDU3LjQgODMgQyA1OC41IDg4LCAyMS41IDg4LCAyMi42IDgzIFoiIGZpbGw9IiNmOGMzZDYiLz4KCiAgPCEtLSB5ZWxsb3cgc2NhcmYva2VyY2hpZWYgLS0+CiAgPHBhdGggZD0iTTMwIDU0IEwgNTAgNTQgTCA0MCA2NiBaIiBmaWxsPSIjZjRjOTRmIi8+CiAgPHBhdGggZD0iTTMwIDU0IEMgMzQgNTgsIDQ2IDU4LCA1MCA1NCBMIDUwIDU3IEMgNDYgNjEsIDM0IDYxLCAzMCA1NyBaIiBmaWxsPSIjZThiODNhIi8+CgogIDwhLS0gaGVhZCAtLT4KICA8Y2lyY2xlIGN4PSI0MCIgY3k9IjMyIiByPSIxOSIgZmlsbD0iI2ZmZGZjOSIvPgoKICA8IS0tIGNoZWVrcyAtLT4KICA8ZWxsaXBzZSBjeD0iMzAiIGN5PSIzOSIgcng9IjQuNSIgcnk9IjMiIGZpbGw9IiNmNTlmOTYiIG9wYWNpdHk9IjAuNTUiLz4KICA8ZWxsaXBzZSBjeD0iNTAiIGN5PSIzOSIgcng9IjQuNSIgcnk9IjMiIGZpbGw9IiNmNTlmOTYiIG9wYWNpdHk9IjAuNTUiLz4KCiAgPCEtLSBiaWcgYmx1ZSBleWVzIHdpdGggbGl0dGxlIGxhc2hlcyAtLT4KICA8Y2lyY2xlIGN4PSIzMyIgY3k9IjMzIiByPSIyLjYiIGZpbGw9IiM1Yjg3YjgiLz4KICA8Y2lyY2xlIGN4PSI0NyIgY3k9IjMzIiByPSIyLjYiIGZpbGw9IiM1Yjg3YjgiLz4KICA8Y2lyY2xlIGN4PSIzMyIgY3k9IjMzIiByPSIxLjIiIGZpbGw9IiMyZTM0NDAiLz4KICA8Y2lyY2xlIGN4PSI0NyIgY3k9IjMzIiByPSIxLjIiIGZpbGw9IiMyZTM0NDAiLz4KICA8Y2lyY2xlIGN4PSIzMy45IiBjeT0iMzIuMSIgcj0iMC44IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iNDcuOSIgY3k9IjMyLjEiIHI9IjAuOCIgZmlsbD0iI2ZmZiIvPgogIDxwYXRoIGQ9Ik0yOS41IDMwLjUgQyAzMSAyOSwgMzQgMjguNiwgMzYgMjkuNiIgc3Ryb2tlPSIjNDYzODI5IiBzdHJva2Utd2lkdGg9IjEuMSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTQzLjUgMjkuNiBDIDQ1LjUgMjguNiwgNDguNSAyOSwgNTAgMzAuNSIgc3Ryb2tlPSIjNDYzODI5IiBzdHJva2Utd2lkdGg9IjEuMSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CgogIDwhLS0gbm9zZSArIHNtaWxlIC0tPgogIDxwYXRoIGQ9Ik0zOSAzNy41IEMgMzkuNyAzOC42LCA0MC4zIDM4LjYsIDQxIDM3LjUiIHN0cm9rZT0iI2U4YjQ5YSIgc3Ryb2tlLXdpZHRoPSIxLjIiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0zNS41IDQzIEMgMzggNDUuNiwgNDIgNDUuNiwgNDQuNSA0MyIgc3Ryb2tlPSIjYzk3YjZkIiBzdHJva2Utd2lkdGg9IjEuNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CgogIDwhLS0gZnJpbmdlOiBzb2Z0IHNjYWxsb3BlZCBiYW5ncyBvdmVyIHRoZSBmb3JlaGVhZCAtLT4KICA8cGF0aCBkPSJNMjEgMzIKICAgICAgICAgICBDIDE5IDE2LCAzMCA5LCA0MCA5CiAgICAgICAgICAgQyA1MCA5LCA2MSAxNiwgNTkgMzIKICAgICAgICAgICBDIDU2IDI4LCA1NSAyNiwgNTMuNSAyNy41CiAgICAgICAgICAgQyA1MiAyNCwgNDkgMjMuNSwgNDcgMjYKICAgICAgICAgICBDIDQ1IDIyLjUsIDQxIDIyLjUsIDM5IDI1LjUKICAgICAgICAgICBDIDM3IDIyLjUsIDMzIDIzLCAzMS41IDI2LjUKICAgICAgICAgICBDIDI5IDI0LCAyNi41IDI1LCAyNS41IDI4CiAgICAgICAgICAgQyAyNCAyNi41LCAyMi41IDI4LjUsIDIxIDMyIFoiCiAgICAgICAgZmlsbD0iI2U4YjA0YiIvPgogIDxwYXRoIGQ9Ik0yOCAxMiBDIDMzIDEwLCA0NyAxMCwgNTIgMTIgQyA0NyAxMy41LCAzMyAxMy41LCAyOCAxMiBaIiBmaWxsPSIjZjJjNjZkIiBvcGFjaXR5PSIwLjgiLz4KCiAgPCEtLSBsaXR0bGUgcGlndGFpbCB0dWZ0IHdpdGggdGhlIHllbGxvdyBkdWNrIGNsaXAgLS0+CiAgPHBhdGggZD0iTTU2IDEyIEMgNjAgNiwgNjYgNywgNjYgMTIgQyA2NiAxNiwgNjEgMTcsIDU4IDE1IFoiIGZpbGw9IiNlOGIwNGIiLz4KICA8Y2lyY2xlIGN4PSI1Ny41IiBjeT0iMTMuNSIgcj0iMS42IiBmaWxsPSIjZTA1YThhIi8+CiAgPGNpcmNsZSBjeD0iNjIiIGN5PSIxMC41IiByPSIzLjIiIGZpbGw9IiNmN2QyNGIiLz4KICA8Y2lyY2xlIGN4PSI2My4yIiBjeT0iOS44IiByPSIwLjYiIGZpbGw9IiM0NjM4MjkiLz4KICA8cGF0aCBkPSJNNjUgMTAuNSBMIDY3IDExLjIgTCA2NSAxMiBaIiBmaWxsPSIjZTg4NjJmIi8+Cjwvc3ZnPgo=" },
   { id: "kid", emoji: "🧒" },
@@ -1064,9 +1111,12 @@ function startTimer(seconds) {
 }
 
 function renderTick() {
-  const m = Math.floor(state.remaining / 60);
+  const h = Math.floor(state.remaining / 3600);
+  const m = Math.floor((state.remaining % 3600) / 60);
   const s = state.remaining % 60;
-  $("time-left").textContent = `${m}:${String(s).padStart(2, "0")}`;
+  $("time-left").textContent = h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+    : `${m}:${String(s).padStart(2, "0")}`;
 
   const progress = 1 - state.remaining / state.totalSeconds;
   // Walker travels from 4% to ~78% so it stops beside the destination.
@@ -1354,6 +1404,22 @@ function releaseWakeLock() {
 $("back-to-choose").addEventListener("click", () =>
   showScreen(state.food ? "screen-food" : "screen-choose")
 );
+
+$("custom-minutes-go").addEventListener("click", () => {
+  const m = parseInt($("custom-minutes").value, 10);
+  if (m >= 1 && m <= 720) startTimer(m * 60);
+});
+
+$("custom-until-go").addEventListener("click", () => {
+  const value = $("custom-until").value; // "HH:MM"
+  if (!value) return;
+  const [hh, mm] = value.split(":").map(Number);
+  const target = new Date();
+  target.setHours(hh, mm, 0, 0);
+  let diff = target.getTime() - Date.now();
+  if (diff <= 0) diff += 24 * 3600 * 1000; // that time already passed → tomorrow
+  startTimer(Math.round(diff / 1000));
+});
 
 $("cancel-timer").addEventListener("click", () => {
   stopTimer();
