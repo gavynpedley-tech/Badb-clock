@@ -264,6 +264,7 @@ body {
   z-index: 1;
 }
 .destination.huge { font-size: clamp(7rem, 24vw, 11rem); bottom: 10%; }
+.destination.center { right: 50%; transform: translateX(50%); }
 .destination.nearly span { display: inline-block; animation: gentle-pulse 1.6s ease-in-out infinite; }
 @keyframes gentle-pulse {
   0%, 100% { transform: scale(1); }
