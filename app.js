@@ -469,10 +469,13 @@ function startTimer(seconds) {
   requestWakeLock();
   startMusic();
 
+  // Track the real clock rather than counting ticks — browser timers get
+  // throttled on long waits, and "finish at 8pm" must actually mean 8pm.
+  state.endTime = Date.now() + seconds * 1000;
   clearInterval(state.intervalId);
   state.intervalId = setInterval(() => {
     if (state.paused) return;
-    state.remaining -= 1;
+    state.remaining = Math.max(0, Math.round((state.endTime - Date.now()) / 1000));
     renderTick();
     if (state.remaining <= 0) finishTimer();
   }, 1000);
@@ -798,8 +801,12 @@ $("pause-btn").addEventListener("click", () => {
   state.paused = !state.paused;
   $("pause-btn").textContent = state.paused ? "▶ Go" : "⏸ Pause";
   $("walker").classList.toggle("walking", !state.paused);
-  if (state.paused) stopMusic();
-  else startMusic();
+  if (state.paused) {
+    stopMusic();
+  } else {
+    state.endTime = Date.now() + state.remaining * 1000; // resume from where we paused
+    startMusic();
+  }
 });
 
 function updateMusicBtn() {
