@@ -112,6 +112,44 @@ body {
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .character-option.selected { border-color: var(--accent); transform: scale(1.08); }
+.character-option { position: relative; }
+.character-option .char-photo { width: 1.9rem; height: 1.9rem; display: block; }
+.character-option.add-character {
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  font-weight: 800;
+  min-width: 2.6rem;
+}
+.char-remove {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e05a8a;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+}
+
+/* photo characters — round face crop everywhere they appear */
+.char-photo {
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: baseline;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(58, 74, 88, 0.25);
+}
+.walker .char-photo { height: 1.6em; width: 1.6em; }
+.done-emoji .char-photo { height: 1em; width: 1em; margin-right: 0.08em; }
 
 /* ---------- Screen 2: time buttons ---------- */
 
@@ -859,17 +897,52 @@ function foodHTML(food) {
 
 let customFoods = [];
 let customVideos = [];
+let customCharacters = [];
 
 function foodsDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open("badb-clock", 2);
+    const req = indexedDB.open("badb-clock", 3);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains("foods")) db.createObjectStore("foods", { keyPath: "id" });
       if (!db.objectStoreNames.contains("videos")) db.createObjectStore("videos", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("characters")) db.createObjectStore("characters", { keyPath: "id" });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+  });
+}
+
+async function loadCustomCharacters() {
+  try {
+    const db = await foodsDB();
+    customCharacters = await new Promise((resolve, reject) => {
+      const req = db.transaction("characters").objectStore("characters").getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (_) {
+    customCharacters = [];
+  }
+}
+
+async function saveCustomCharacter(character) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("characters", "readwrite");
+    tx.objectStore("characters").put(character);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteCustomCharacter(id) {
+  const db = await foodsDB();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("characters", "readwrite");
+    tx.objectStore("characters").delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
   });
 }
 
@@ -1117,6 +1190,7 @@ const state = {
 };
 
 function characterHTML(c) {
+  if (c.photo) return `<img class="char-photo" src="${c.photo}" alt="">`;
   return c.img ? `<img class="char-img" src="${c.img}" alt="">` : c.emoji;
 }
 
@@ -1151,18 +1225,79 @@ function buildChooseScreen() {
     grid.appendChild(card);
   });
 
+  buildCharacterPicker();
+}
+
+/* The character picker: the drawn avatar, the emoji kids, any photo
+   characters the family has added, and a ＋ to add one from a photo of
+   their own kid (cropped round, stored on the device). */
+function buildCharacterPicker() {
   const picker = $("character-picker");
-  CHARACTERS.forEach((c) => {
+  picker.innerHTML = "";
+  [...CHARACTERS, ...customCharacters].forEach((c) => {
     const opt = document.createElement("button");
-    opt.className = "character-option" + (c === state.character ? " selected" : "");
+    opt.className = "character-option" + (c.id === state.character.id ? " selected" : "");
     opt.innerHTML = characterHTML(c);
+    if (c.photo) {
+      const remove = document.createElement("span");
+      remove.className = "char-remove";
+      remove.textContent = "✕";
+      remove.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm("Remove this character?")) return;
+        try { await deleteCustomCharacter(c.id); } catch (_) { /* remove for the session anyway */ }
+        customCharacters = customCharacters.filter((x) => x.id !== c.id);
+        if (state.character.id === c.id) {
+          state.character = CHARACTERS[0];
+          localStorage.setItem("badb-character", state.character.id);
+        }
+        buildCharacterPicker();
+      });
+      opt.appendChild(remove);
+    }
     opt.addEventListener("click", () => {
       state.character = c;
       localStorage.setItem("badb-character", c.id);
-      picker.querySelectorAll(".character-option").forEach((o) => o.classList.remove("selected"));
-      opt.classList.add("selected");
+      buildCharacterPicker();
     });
     picker.appendChild(opt);
+  });
+
+  const add = document.createElement("label");
+  add.className = "character-option add-character";
+  add.innerHTML = `＋<input type="file" accept="image/*" hidden>`;
+  add.querySelector("input").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const photo = await squareCropPhoto(file, 256);
+      const character = { id: `char-${Date.now()}`, photo };
+      await saveCustomCharacter(character).catch(() => {});
+      customCharacters.push(character);
+      state.character = character;
+      localStorage.setItem("badb-character", character.id);
+      buildCharacterPicker();
+    } catch (_) { /* unreadable image — leave the picker as it was */ }
+  });
+  picker.appendChild(add);
+}
+
+/* centre-crop any image square, used for photo characters */
+function squareCropPhoto(file, size) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      const side = Math.min(im.width, im.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      canvas.getContext("2d").drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, size, size);
+      resolve(canvas.toDataURL("image/jpeg", 0.88));
+    };
+    im.onerror = reject;
+    im.src = url;
   });
 }
 
@@ -1909,6 +2044,12 @@ buildChooseScreen();
 buildTimeScreen();
 loadCustomFoods();
 loadCustomVideos();
+loadCustomCharacters().then(() => {
+  // a saved photo character can only be resolved once they're loaded
+  const saved = customCharacters.find((c) => c.id === savedCharacter);
+  if (saved) state.character = saved;
+  buildCharacterPicker();
+});
 
 </script>
 </body>

@@ -102,6 +102,44 @@ body {
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .character-option.selected { border-color: var(--accent); transform: scale(1.08); }
+.character-option { position: relative; }
+.character-option .char-photo { width: 1.9rem; height: 1.9rem; display: block; }
+.character-option.add-character {
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  font-weight: 800;
+  min-width: 2.6rem;
+}
+.char-remove {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e05a8a;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+}
+
+/* photo characters — round face crop everywhere they appear */
+.char-photo {
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: baseline;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(58, 74, 88, 0.25);
+}
+.walker .char-photo { height: 1.6em; width: 1.6em; }
+.done-emoji .char-photo { height: 1em; width: 1em; margin-right: 0.08em; }
 
 /* ---------- Screen 2: time buttons ---------- */
 
