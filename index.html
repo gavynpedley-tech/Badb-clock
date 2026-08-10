@@ -74,10 +74,14 @@
   <h1 id="add-food-title" class="screen-title">Add a food</h1>
   <div class="add-food-form">
     <label class="photo-drop">
-      <input type="file" id="food-photo-input" accept="image/*" capture="environment" hidden>
-      <span id="photo-drop-hint">📷 Tap to take a photo</span>
+      <input type="file" id="food-photo-input" accept="image/*" hidden>
+      <span id="photo-drop-hint">🖼 Tap to add a photo</span>
       <img id="photo-preview" class="photo-preview" alt="" hidden>
     </label>
+    <div class="food-admin">
+      <label class="admin-btn">📷 Camera<input type="file" id="food-photo-camera" accept="image/*" capture="environment" hidden></label>
+      <label class="admin-btn">🖼 My photos<input type="file" id="food-photo-gallery" accept="image/*" hidden></label>
+    </div>
     <button id="cartoon-toggle" class="control-btn" hidden>🎨 Cartoon: on</button>
     <input type="text" id="food-name" class="text-input" placeholder="What is it called?" maxlength="24">
     <div class="cat-chips">

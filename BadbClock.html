@@ -639,10 +639,14 @@ body {
   <h1 id="add-food-title" class="screen-title">Add a food</h1>
   <div class="add-food-form">
     <label class="photo-drop">
-      <input type="file" id="food-photo-input" accept="image/*" capture="environment" hidden>
-      <span id="photo-drop-hint">📷 Tap to take a photo</span>
+      <input type="file" id="food-photo-input" accept="image/*" hidden>
+      <span id="photo-drop-hint">🖼 Tap to add a photo</span>
       <img id="photo-preview" class="photo-preview" alt="" hidden>
     </label>
+    <div class="food-admin">
+      <label class="admin-btn">📷 Camera<input type="file" id="food-photo-camera" accept="image/*" capture="environment" hidden></label>
+      <label class="admin-btn">🖼 My photos<input type="file" id="food-photo-gallery" accept="image/*" hidden></label>
+    </div>
     <button id="cartoon-toggle" class="control-btn" hidden>🎨 Cartoon: on</button>
     <input type="text" id="food-name" class="text-input" placeholder="What is it called?" maxlength="24">
     <div class="cat-chips">
@@ -1669,7 +1673,7 @@ function openAddFood(food) {
     : (state.foodCategory || "both");
   $("add-food-title").textContent = food ? "Edit food" : "Add a food";
   $("food-name").value = food ? food.label : "";
-  $("food-photo-input").value = "";
+  $("photo-drop-hint").textContent = "🖼 Tap to add a photo";
   refreshAddFoodForm();
   showScreen("screen-add-food");
 }
@@ -1689,8 +1693,9 @@ function refreshAddFoodForm() {
   $("save-food").disabled = !(havePhoto && $("food-name").value.trim());
 }
 
-$("food-photo-input").addEventListener("change", async (e) => {
+async function handleFoodPhoto(e) {
   const file = e.target.files && e.target.files[0];
+  e.target.value = "";
   if (!file) return;
   $("photo-drop-hint").textContent = "…";
   try {
@@ -1698,11 +1703,14 @@ $("food-photo-input").addEventListener("change", async (e) => {
     addFoodState.photo = photo;
     addFoodState.cartoon = cartoon;
   } catch (_) {
-    $("photo-drop-hint").textContent = "📷 That photo didn't work — try again";
+    $("photo-drop-hint").textContent = "🖼 That photo didn't work — try again";
     return;
   }
   refreshAddFoodForm();
-});
+}
+$("food-photo-input").addEventListener("change", handleFoodPhoto);
+$("food-photo-camera").addEventListener("change", handleFoodPhoto);
+$("food-photo-gallery").addEventListener("change", handleFoodPhoto);
 
 $("cartoon-toggle").addEventListener("click", () => {
   addFoodState.useCartoon = !addFoodState.useCartoon;

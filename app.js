@@ -947,7 +947,7 @@ function openAddFood(food) {
     : (state.foodCategory || "both");
   $("add-food-title").textContent = food ? "Edit food" : "Add a food";
   $("food-name").value = food ? food.label : "";
-  $("food-photo-input").value = "";
+  $("photo-drop-hint").textContent = "🖼 Tap to add a photo";
   refreshAddFoodForm();
   showScreen("screen-add-food");
 }
@@ -967,8 +967,9 @@ function refreshAddFoodForm() {
   $("save-food").disabled = !(havePhoto && $("food-name").value.trim());
 }
 
-$("food-photo-input").addEventListener("change", async (e) => {
+async function handleFoodPhoto(e) {
   const file = e.target.files && e.target.files[0];
+  e.target.value = "";
   if (!file) return;
   $("photo-drop-hint").textContent = "…";
   try {
@@ -976,11 +977,14 @@ $("food-photo-input").addEventListener("change", async (e) => {
     addFoodState.photo = photo;
     addFoodState.cartoon = cartoon;
   } catch (_) {
-    $("photo-drop-hint").textContent = "📷 That photo didn't work — try again";
+    $("photo-drop-hint").textContent = "🖼 That photo didn't work — try again";
     return;
   }
   refreshAddFoodForm();
-});
+}
+$("food-photo-input").addEventListener("change", handleFoodPhoto);
+$("food-photo-camera").addEventListener("change", handleFoodPhoto);
+$("food-photo-gallery").addEventListener("change", handleFoodPhoto);
 
 $("cartoon-toggle").addEventListener("click", () => {
   addFoodState.useCartoon = !addFoodState.useCartoon;
