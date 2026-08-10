@@ -1,6 +1,9 @@
 /* Minimal offline cache so the timer works in the car, on walks, anywhere. */
-const CACHE = "badb-clock-v10";
-const ASSETS = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icon.svg", "avatar.svg"];
+const CACHE = "badb-clock-v11";
+const ASSETS = [
+  "./", "index.html", "style.css", "app.js", "manifest.webmanifest",
+  "icon.svg", "icon-192.png", "icon-512.png", "icon-maskable.png", "avatar.svg",
+];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));

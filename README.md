@@ -23,12 +23,20 @@ On the food screen, **＋ Add a food** opens the camera: take a photo of the rea
 - **Visual first**: the character's journey and the shrinking bar tell the story even before numbers make sense.
 - **Big touch targets**: everything is tappable by small hands on a phone or tablet.
 
-## Running it
+## Install it
+
+The app is hosted free on GitHub Pages:
+
+**https://gavynpedley-tech.github.io/Badb-clock/**
+
+Open that link on a phone or tablet, then Chrome menu ⋮ → **Add to Home screen** (Safari: Share → Add to Home Screen). It installs like a real app — fullscreen, its own icon, works completely offline after the first visit. Share the link with anyone who might find it useful; it's free (MIT licensed), has no accounts, no ads, no tracking, and never sends anything anywhere — all data stays on the device.
+
+## Running it locally
 
 It's a plain static web app — no build step, no dependencies.
 
-- Open `index.html` in any browser, or
-- Serve the folder (`python3 -m http.server`) and open it on a tablet, then use "Add to Home Screen" — it installs as a fullscreen app and works offline.
+- Open `index.html` in any browser, or serve the folder (`python3 -m http.server`).
+- `BadbClock.html` is a single-file build of the whole app (regenerate with `python3 build.py`) for passing around as one file.
 
 ## Ideas for later
 
