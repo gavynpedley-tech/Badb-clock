@@ -1191,15 +1191,29 @@ function buildEditFoodList() {
 
 let removingVideos = false;
 
-function videoThumb(file) {
+/* Probe whether this phone can actually decode the file, and grab a
+   thumbnail while we're in there. Torrented films are often HEVC/x265 or
+   AC3 inside an .mp4/.mkv — containers this browser opens but codecs it
+   can't decode — and silently importing those gives a "playing" black
+   screen. Better to say so at import time. */
+function probeVideo(file) {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const v = document.createElement("video");
-    const done = (thumb) => { URL.revokeObjectURL(url); resolve(thumb); };
-    const timeout = setTimeout(() => done(null), 5000);
+    const done = (result) => { URL.revokeObjectURL(url); resolve(result); };
+    // Big files on slow storage can be sluggish — assume OK on timeout.
+    const timeout = setTimeout(() => done({ playable: true, thumb: null }), 8000);
     v.muted = true;
     v.preload = "auto";
-    v.onloadeddata = () => { v.currentTime = Math.min(1, (v.duration || 2) / 2); };
+    v.onloadeddata = () => {
+      if (!v.videoWidth) {
+        // container opened but the video track can't be decoded
+        clearTimeout(timeout);
+        done({ playable: false, thumb: null });
+        return;
+      }
+      v.currentTime = Math.min(1, (v.duration || 2) / 2);
+    };
     v.onseeked = () => {
       clearTimeout(timeout);
       const canvas = document.createElement("canvas");
@@ -1209,9 +1223,9 @@ function videoThumb(file) {
       const w = v.videoWidth * scale;
       const h = v.videoHeight * scale;
       canvas.getContext("2d").drawImage(v, (320 - w) / 2, (180 - h) / 2, w, h);
-      done(canvas.toDataURL("image/jpeg", 0.8));
+      done({ playable: true, thumb: canvas.toDataURL("image/jpeg", 0.8) });
     };
-    v.onerror = () => { clearTimeout(timeout); done(null); };
+    v.onerror = () => { clearTimeout(timeout); done({ playable: false, thumb: null }); };
     v.src = url;
   });
 }
@@ -1279,12 +1293,24 @@ $("video-remove-btn").addEventListener("click", () => {
   buildVideoGrid();
 });
 
-$("video-input").addEventListener("change", async (e) => {
+async function handleVideoImport(e) {
   const file = e.target.files && e.target.files[0];
   e.target.value = "";
   if (!file) return;
   $("video-hint").textContent = "Adding… (big films take a minute)";
-  const thumb = await videoThumb(file);
+  const { playable, thumb } = await probeVideo(file);
+  if (!playable) {
+    $("video-hint").textContent = "";
+    alert(
+      `This phone can't play "${file.name}".\n\n` +
+        "It's usually the codecs inside the file (often HEVC/x265 video or AC3 audio), " +
+        "even when the file is an .mp4. A version using H.264/x264 video with AAC audio " +
+        "will work — converting on a computer with the free HandBrake app " +
+        '("Fast 1080p30" preset) fixes it.'
+    );
+    buildVideoGrid();
+    return;
+  }
   const video = {
     id: `video-${Date.now()}`,
     label: file.name.replace(/\.[^.]+$/, ""),
@@ -1298,7 +1324,9 @@ $("video-input").addEventListener("change", async (e) => {
   }
   customVideos.push(video);
   buildVideoGrid();
-});
+}
+$("video-input").addEventListener("change", handleVideoImport);
+$("video-input-files").addEventListener("change", handleVideoImport);
 
 $("add-food-btn").addEventListener("click", () => openAddFood(null));
 $("edit-foods-btn").addEventListener("click", () => {

@@ -18,10 +18,10 @@
 <section id="screen-choose" class="screen active">
   <h1 class="screen-title">Where are we going?</h1>
   <div id="transition-grid" class="card-grid"></div>
+  <button id="videos-btn" class="videos-big-btn"><span class="emoji">🎬</span> Videos</button>
   <div class="settings-row">
     <span class="settings-label">Who is going?</span>
     <div id="character-picker" class="character-picker"></div>
-    <button id="videos-btn" class="admin-btn">🎬 Videos</button>
   </div>
 </section>
 
@@ -32,7 +32,8 @@
   <div id="video-grid" class="video-grid"></div>
   <div class="settings-row">
     <div class="food-admin">
-      <label class="admin-btn">＋ Add a video<input type="file" id="video-input" accept="video/*" hidden></label>
+      <label class="admin-btn">🎞 Add from my videos<input type="file" id="video-input" accept="video/*" hidden></label>
+      <label class="admin-btn">📁 Add from files<input type="file" id="video-input-files" hidden></label>
       <button id="video-remove-btn" class="admin-btn" hidden>🗑 Remove</button>
       <a class="admin-btn" href="https://www.youtube.com/feed/downloads">▶ YouTube downloads</a>
     </div>
@@ -42,7 +43,7 @@
 
 <!-- fullscreen instant player -->
 <div id="video-player" class="video-overlay" hidden>
-  <video id="video-el" playsinline loop></video>
+  <video id="video-el" playsinline loop controls controlslist="nodownload"></video>
   <button id="video-close" class="back-btn" aria-label="Close video">✕</button>
 </div>
 

@@ -508,6 +508,29 @@ body {
 
 /* ---------- instant videos ---------- */
 
+.videos-big-btn {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 720px;
+  font-family: inherit;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card);
+  border: 3px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.videos-big-btn:active { transform: scale(0.97); border-color: var(--accent); }
+.videos-big-btn .emoji { font-size: 1.6em; line-height: 1; }
+
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -621,10 +644,10 @@ body {
 <section id="screen-choose" class="screen active">
   <h1 class="screen-title">Where are we going?</h1>
   <div id="transition-grid" class="card-grid"></div>
+  <button id="videos-btn" class="videos-big-btn"><span class="emoji">🎬</span> Videos</button>
   <div class="settings-row">
     <span class="settings-label">Who is going?</span>
     <div id="character-picker" class="character-picker"></div>
-    <button id="videos-btn" class="admin-btn">🎬 Videos</button>
   </div>
 </section>
 
@@ -635,7 +658,8 @@ body {
   <div id="video-grid" class="video-grid"></div>
   <div class="settings-row">
     <div class="food-admin">
-      <label class="admin-btn">＋ Add a video<input type="file" id="video-input" accept="video/*" hidden></label>
+      <label class="admin-btn">🎞 Add from my videos<input type="file" id="video-input" accept="video/*" hidden></label>
+      <label class="admin-btn">📁 Add from files<input type="file" id="video-input-files" hidden></label>
       <button id="video-remove-btn" class="admin-btn" hidden>🗑 Remove</button>
       <a class="admin-btn" href="https://www.youtube.com/feed/downloads">▶ YouTube downloads</a>
     </div>
@@ -645,7 +669,7 @@ body {
 
 <!-- fullscreen instant player -->
 <div id="video-player" class="video-overlay" hidden>
-  <video id="video-el" playsinline loop></video>
+  <video id="video-el" playsinline loop controls controlslist="nodownload"></video>
   <button id="video-close" class="back-btn" aria-label="Close video">✕</button>
 </div>
 
@@ -1956,15 +1980,29 @@ function buildEditFoodList() {
 
 let removingVideos = false;
 
-function videoThumb(file) {
+/* Probe whether this phone can actually decode the file, and grab a
+   thumbnail while we're in there. Torrented films are often HEVC/x265 or
+   AC3 inside an .mp4/.mkv — containers this browser opens but codecs it
+   can't decode — and silently importing those gives a "playing" black
+   screen. Better to say so at import time. */
+function probeVideo(file) {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const v = document.createElement("video");
-    const done = (thumb) => { URL.revokeObjectURL(url); resolve(thumb); };
-    const timeout = setTimeout(() => done(null), 5000);
+    const done = (result) => { URL.revokeObjectURL(url); resolve(result); };
+    // Big files on slow storage can be sluggish — assume OK on timeout.
+    const timeout = setTimeout(() => done({ playable: true, thumb: null }), 8000);
     v.muted = true;
     v.preload = "auto";
-    v.onloadeddata = () => { v.currentTime = Math.min(1, (v.duration || 2) / 2); };
+    v.onloadeddata = () => {
+      if (!v.videoWidth) {
+        // container opened but the video track can't be decoded
+        clearTimeout(timeout);
+        done({ playable: false, thumb: null });
+        return;
+      }
+      v.currentTime = Math.min(1, (v.duration || 2) / 2);
+    };
     v.onseeked = () => {
       clearTimeout(timeout);
       const canvas = document.createElement("canvas");
@@ -1974,9 +2012,9 @@ function videoThumb(file) {
       const w = v.videoWidth * scale;
       const h = v.videoHeight * scale;
       canvas.getContext("2d").drawImage(v, (320 - w) / 2, (180 - h) / 2, w, h);
-      done(canvas.toDataURL("image/jpeg", 0.8));
+      done({ playable: true, thumb: canvas.toDataURL("image/jpeg", 0.8) });
     };
-    v.onerror = () => { clearTimeout(timeout); done(null); };
+    v.onerror = () => { clearTimeout(timeout); done({ playable: false, thumb: null }); };
     v.src = url;
   });
 }
@@ -2044,12 +2082,24 @@ $("video-remove-btn").addEventListener("click", () => {
   buildVideoGrid();
 });
 
-$("video-input").addEventListener("change", async (e) => {
+async function handleVideoImport(e) {
   const file = e.target.files && e.target.files[0];
   e.target.value = "";
   if (!file) return;
   $("video-hint").textContent = "Adding… (big films take a minute)";
-  const thumb = await videoThumb(file);
+  const { playable, thumb } = await probeVideo(file);
+  if (!playable) {
+    $("video-hint").textContent = "";
+    alert(
+      `This phone can't play "${file.name}".\n\n` +
+        "It's usually the codecs inside the file (often HEVC/x265 video or AC3 audio), " +
+        "even when the file is an .mp4. A version using H.264/x264 video with AAC audio " +
+        "will work — converting on a computer with the free HandBrake app " +
+        '("Fast 1080p30" preset) fixes it.'
+    );
+    buildVideoGrid();
+    return;
+  }
   const video = {
     id: `video-${Date.now()}`,
     label: file.name.replace(/\.[^.]+$/, ""),
@@ -2063,7 +2113,9 @@ $("video-input").addEventListener("change", async (e) => {
   }
   customVideos.push(video);
   buildVideoGrid();
-});
+}
+$("video-input").addEventListener("change", handleVideoImport);
+$("video-input-files").addEventListener("change", handleVideoImport);
 
 $("add-food-btn").addEventListener("click", () => openAddFood(null));
 $("edit-foods-btn").addEventListener("click", () => {

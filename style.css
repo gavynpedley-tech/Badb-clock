@@ -497,6 +497,29 @@ body {
 
 /* ---------- instant videos ---------- */
 
+.videos-big-btn {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 720px;
+  font-family: inherit;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card);
+  border: 3px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.videos-big-btn:active { transform: scale(0.97); border-color: var(--accent); }
+.videos-big-btn .emoji { font-size: 1.6em; line-height: 1; }
+
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
