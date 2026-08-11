@@ -783,6 +783,9 @@ const TRANSITIONS = [
   { id: "park",   label: "The park",  emoji: "🌳", phrase: "We're going to the park",  done: "We're at the park!" },
   { id: "shops",  label: "The shops", emoji: "🛒", phrase: "We're going to the shops", done: "We're at the shops!" },
   { id: "walk",   label: "A walk",    emoji: "🚶", phrase: "We're going for a walk",   done: "Walk time!" },
+  { id: "taxi",   label: "A taxi",    emoji: "🚕", phrase: "We're going in a taxi",    done: "Taxi time!" },
+  { id: "airport", label: "The airport", emoji: "🛄", phrase: "We're going to the airport", done: "We're at the airport!" },
+  { id: "plane",  label: "The plane", emoji: "✈️", phrase: "We're going on the plane", done: "Time to fly!" },
 ];
 
 /* ---------- her foods, drawn to match the real things ----------
@@ -1155,6 +1158,38 @@ const TRANSITION_ART = {
       <circle cx="29.5" cy="14.4" r="1.7" fill="#3d2c20"/>
     </g>`,
 };
+
+TRANSITION_ART.taxi = `
+    <rect x="20" y="6.5" width="9" height="4" rx="1.2" fill="#fdfdfd" stroke="#1d242c" stroke-width="0.8"/>
+    <text x="24.5" y="9.7" text-anchor="middle" font-size="2.8" font-weight="bold" fill="#1d242c" font-family="sans-serif">TAXI</text>
+    <path d="M14.5 19 L17.5 12.5 C 18 11.4, 19 10.8, 20.3 10.8 L 28 10.8 C 29.3 10.8, 30.3 11.4, 30.8 12.5 L 33.5 19 Z" fill="#1d242c"/>
+    <rect x="4" y="18" width="32" height="9.5" rx="3" fill="#1d242c"/>
+    <rect x="19" y="19" width="7.5" height="8" rx="1.5" fill="#f5c400"/>
+    <path d="M20.5 22.5 h2.5" stroke="#1d242c" stroke-width="1" stroke-linecap="round"/>
+    <rect x="18.7" y="12.3" width="5.4" height="5.2" rx="1" fill="#cfe4f2"/>
+    <rect x="25.5" y="12.3" width="4.6" height="5.2" rx="1" fill="#cfe4f2"/>
+    <circle cx="35.5" cy="20.5" r="1.2" fill="#f7d24b"/>
+    <circle cx="12" cy="28" r="3.6" fill="#2e3440" stroke="#11151a" stroke-width="1"/>
+    <circle cx="12" cy="28" r="1.4" fill="#aebfcc"/>
+    <circle cx="29" cy="28" r="3.6" fill="#2e3440" stroke="#11151a" stroke-width="1"/>
+    <circle cx="29" cy="28" r="1.4" fill="#aebfcc"/>`;
+
+TRANSITION_ART.airport = `
+    <g transform="rotate(-12 11 8)">
+      <ellipse cx="11" cy="8" rx="5" ry="1.6" fill="#8fa8c4"/>
+      <path d="M10 8 L6.5 4.8 L8.6 8 L6.5 11.2 Z" fill="#8fa8c4"/>
+      <path d="M15 7.4 L16.6 5.8 L16.2 8.2 Z" fill="#8fa8c4"/>
+    </g>
+    <rect x="4" y="21" width="22" height="12" rx="2" fill="#dbe7f0"/>
+    <rect x="4" y="26.5" width="22" height="6.5" rx="1.5" fill="#cfe4f2"/>
+    <rect x="7" y="23" width="4" height="2.6" rx="0.8" fill="#9fc2e0"/>
+    <rect x="13" y="23" width="4" height="2.6" rx="0.8" fill="#9fc2e0"/>
+    <rect x="19" y="23" width="4" height="2.6" rx="0.8" fill="#9fc2e0"/>
+    <rect x="29" y="16" width="4" height="17" fill="#cfd7e0"/>
+    <rect x="27" y="11.5" width="8" height="5" rx="2" fill="#8fa8c4"/>
+    <path d="M31 11.5 V8.5" stroke="#8fa8c4" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="31" cy="7.8" r="1" fill="#e05a8a"/>
+    <rect x="2" y="33" width="36" height="2" rx="1" fill="#b8c6d2"/>`;
 
 function transitionIconHTML(t) {
   return TRANSITION_ART[t.id]
