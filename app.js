@@ -4,6 +4,8 @@
 
 "use strict";
 
+const APP_VERSION = "17"; // keep in step with the cache version in sw.js
+
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
   { id: "food",   label: "Food",      emoji: "🍽️", phrase: "We're going for food",     done: "Time for food!" },
@@ -1390,4 +1392,19 @@ loadCustomCharacters().then(() => {
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
+  // When an update finishes installing, switch to it right away instead of
+  // waiting for the next launch — but never mid-countdown or mid-video.
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloadedForUpdate) return;
+    const idle =
+      !state.intervalId &&
+      $("screen-choose").classList.contains("active") &&
+      $("video-player").hidden;
+    if (idle) {
+      reloadedForUpdate = true;
+      location.reload();
+    }
+  });
 }
+$("version-tag").textContent = `v${APP_VERSION}`;

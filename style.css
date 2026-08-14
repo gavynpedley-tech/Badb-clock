@@ -91,6 +91,7 @@ body {
   gap: 8px;
 }
 .settings-label { font-size: 1rem; color: var(--ink-soft); font-weight: 600; }
+.version-tag { font-size: 0.75rem; color: var(--ink-soft); opacity: 0.6; font-weight: 600; }
 .character-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .character-option {
   font-size: 1.9rem;
