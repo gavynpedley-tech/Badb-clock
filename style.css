@@ -575,6 +575,16 @@ body {
   top: 8px; right: 10px;
   font-size: 1.6rem;
 }
+.video-grid.renaming .video-tile { outline: 3px dashed var(--accent); outline-offset: -3px; }
+.video-grid.renaming .play-badge { display: none; }
+.video-grid.renaming .video-tile::after {
+  content: "✎";
+  position: absolute;
+  top: 8px; right: 10px;
+  font-size: 1.6rem;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
 .food-admin a.admin-btn { text-decoration: none; display: inline-block; }
 
 .video-overlay {

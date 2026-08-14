@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "17"; // keep in step with the cache version in sw.js
+const APP_VERSION = "18"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -1230,6 +1230,19 @@ function buildEditFoodList() {
    from local storage — no network, no buffering, no adverts. */
 
 let removingVideos = false;
+let renamingVideos = false;
+
+/* Downloaded films arrive named like "Some.Film.1967.1080p.BluRay.x264-GROUP".
+   Strip the release gibberish so tiles start with a sensible name. */
+function cleanVideoName(filename) {
+  let name = filename.replace(/\.[^.]+$/, "").replace(/[._]+/g, " ");
+  const cut = name.search(
+    /\b((19|20)\d{2}|2160p|1080p|720p|480p|4k|x264|x265|h ?264|h ?265|hevc|webrip|web ?dl|bluray|brrip|hdrip|dvdrip|remux|proper|repack|extended|remastered)\b/i
+  );
+  if (cut > 0) name = name.slice(0, cut);
+  name = name.replace(/[[\](){}-]+/g, " ").replace(/\s+/g, " ").trim();
+  return name || filename.replace(/\.[^.]+$/, "");
+}
 
 /* Probe whether this phone can actually decode the file, and grab a
    thumbnail while we're in there. Torrented films are often HEVC/x265 or
@@ -1282,7 +1295,13 @@ function buildVideoGrid() {
       <span class="play-badge">▶️</span>
       <span class="name">${v.label}</span>`;
     tile.addEventListener("click", async () => {
-      if (removingVideos) {
+      if (renamingVideos) {
+        const name = prompt("What should this be called?", v.label);
+        if (name === null) return;
+        v.label = name.trim() || v.label;
+        try { await saveCustomVideo(v); } catch (_) { /* keep the new name for the session */ }
+        buildVideoGrid();
+      } else if (removingVideos) {
         if (!confirm(`Remove ${v.label}?`)) return;
         try { await deleteCustomVideo(v.id); } catch (_) { /* remove for the session anyway */ }
         customVideos = customVideos.filter((x) => x.id !== v.id);
@@ -1294,8 +1313,11 @@ function buildVideoGrid() {
     });
     grid.appendChild(tile);
   });
+  grid.classList.toggle("renaming", renamingVideos);
   $("video-remove-btn").hidden = customVideos.length === 0;
   $("video-remove-btn").textContent = removingVideos ? "✓ Done" : "🗑 Remove";
+  $("video-rename-btn").hidden = customVideos.length === 0;
+  $("video-rename-btn").textContent = renamingVideos ? "✓ Done" : "✎ Rename";
   $("video-hint").textContent = customVideos.length === 0
     ? "Add favourite videos here in a quiet moment — after that they play instantly, even offline."
     : "";
@@ -1330,6 +1352,13 @@ $("back-videos").addEventListener("click", () => showScreen("screen-choose"));
 $("video-close").addEventListener("click", closeVideo);
 $("video-remove-btn").addEventListener("click", () => {
   removingVideos = !removingVideos;
+  renamingVideos = false;
+  buildVideoGrid();
+});
+
+$("video-rename-btn").addEventListener("click", () => {
+  renamingVideos = !renamingVideos;
+  removingVideos = false;
   buildVideoGrid();
 });
 
@@ -1353,7 +1382,7 @@ async function handleVideoImport(e) {
   }
   const video = {
     id: `video-${Date.now()}`,
-    label: file.name.replace(/\.[^.]+$/, ""),
+    label: cleanVideoName(file.name),
     blob: file,
     thumb,
   };
