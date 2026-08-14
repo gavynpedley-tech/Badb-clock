@@ -21,6 +21,7 @@ const TRANSITIONS = [
   { id: "taxi",   label: "A taxi",    emoji: "🚕", phrase: "We're going in a taxi",    done: "Taxi time!" },
   { id: "airport", label: "The airport", emoji: "🛄", phrase: "We're going to the airport", done: "We're at the airport!" },
   { id: "plane",  label: "The plane", emoji: "✈️", phrase: "We're going on the plane", done: "Time to fly!" },
+  { id: "aquarium", label: "The aquarium", emoji: "🦈", phrase: "We're going to the aquarium", done: "We're at the aquarium!" },
 ];
 
 /* ---------- her foods, drawn to match the real things ----------
@@ -426,6 +427,40 @@ TRANSITION_ART.airport = `
     <circle cx="31" cy="7.8" r="1" fill="#e05a8a"/>
     <rect x="2" y="33" width="36" height="2" rx="1" fill="#b8c6d2"/>`;
 
+TRANSITION_ART.aquarium = `
+    <defs><clipPath id="aq-water"><rect x="4.5" y="9" width="31" height="21.5" rx="1.5"/></clipPath></defs>
+    <rect x="3" y="6" width="34" height="27" rx="2.5" fill="#a5d4ea" stroke="#8fa8c4" stroke-width="1.6"/>
+    <rect x="4.5" y="7.5" width="31" height="3" fill="#c3e2f0"/>
+    <g clip-path="url(#aq-water)">
+      <rect x="4.5" y="27.5" width="31" height="3.5" fill="#e8d9a8"/>
+      <circle cx="10" cy="29.5" r="1" fill="#d3c28e"/>
+      <circle cx="27" cy="29.8" r="1.2" fill="#d3c28e"/>
+      <path d="M8 28 C 7 25, 9 24, 8 21 C 7.5 19, 9 18, 8.5 16" stroke="#79b07a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <path d="M32 28 C 33 25.5, 31 24, 32 21.5 C 32.5 19.5, 31.5 19, 32 17.5" stroke="#8fc98f" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <circle cx="13" cy="24" r="0.8" fill="#dff1f8">
+        <animate attributeName="cy" values="26;10" dur="3.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0" dur="3.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="30" cy="22" r="0.6" fill="#dff1f8">
+        <animate attributeName="cy" values="25;10" dur="2.6s" begin="1s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0" dur="2.6s" begin="1s" repeatCount="indefinite"/>
+      </circle>
+      <g>
+        <animateTransform attributeName="transform" type="translate" values="-20 0; 42 0" dur="7s" repeatCount="indefinite"/>
+        <g>
+          <animateTransform attributeName="transform" type="translate" values="0 0; 0 -1.2; 0 0" dur="1.8s" repeatCount="indefinite"/>
+          <path d="M2 19.5 C 5 15.5, 12 15, 15.5 18 C 17 19.2, 17 20.8, 15.5 21.8 C 12 24.2, 5 23.2, 2 20.5 Z" fill="#7f9bb8"/>
+          <path d="M3.5 20.8 C 6.5 22.8, 11.5 23.3, 14.5 21.6 C 11 23.6, 6 23.2, 3.5 20.8 Z" fill="#dbe7f0"/>
+          <path d="M8.5 16.2 L10.5 12.5 L12.3 16.4 Z" fill="#7f9bb8"/>
+          <path d="M2.6 19.9 L-1.5 16.5 L-0.5 20 L-1.5 23.5 Z" fill="#7f9bb8"/>
+          <path d="M9.5 20.8 L11 23.6 L12.6 21.2 Z" fill="#6e89a6"/>
+          <circle cx="13.8" cy="18.3" r="0.75" fill="#2e3440"/>
+          <path d="M12 20.6 C 12.5 20.1, 13.2 20, 13.8 20.2" stroke="#6e89a6" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+          <path d="M10.7 17.6 M10.5 18.4 l1 0 M10.9 19.2 l0.9 0" stroke="#6e89a6" stroke-width="0.6"/>
+        </g>
+      </g>
+    </g>`;
+
 function transitionIconHTML(t) {
   return TRANSITION_ART[t.id]
     ? `<svg class="food-svg" viewBox="0 0 40 40" aria-hidden="true">${TRANSITION_ART[t.id]}</svg>`
@@ -635,8 +670,11 @@ function startTimer(seconds) {
   else if (state.food) $("destination-emoji").innerHTML = foodHTML(state.food);
   else $("destination-emoji").innerHTML = transitionIconHTML(state.transition);
   $("destination").classList.toggle("center", brushing);
-  // scene-style destinations (brushing, the dance party) get extra room
-  $("destination").classList.toggle("huge", brushing || (!state.food && state.transition.id === "disco"));
+  // scene-style destinations (brushing, dance party, aquarium) get extra room
+  $("destination").classList.toggle(
+    "huge",
+    brushing || (!state.food && ["disco", "aquarium"].includes(state.transition.id))
+  );
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
   $("progress-fill").classList.remove("nearly");
