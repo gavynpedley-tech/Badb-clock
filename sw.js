@@ -1,5 +1,5 @@
 /* Minimal offline cache so the timer works in the car, on walks, anywhere. */
-const CACHE = "badb-clock-v18";
+const CACHE = "badb-clock-v19";
 const ASSETS = [
   "./", "index.html", "style.css", "app.js", "manifest.webmanifest",
   "icon.svg", "icon-192.png", "icon-512.png", "icon-maskable.png", "avatar.svg",

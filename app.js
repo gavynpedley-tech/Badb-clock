@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "18"; // keep in step with the cache version in sw.js
+const APP_VERSION = "19"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -24,6 +24,7 @@ const TRANSITIONS = [
   { id: "airport", label: "The airport", emoji: "🛄", phrase: "We're going to the airport", done: "We're at the airport!" },
   { id: "plane",  label: "The plane", emoji: "✈️", phrase: "We're going on the plane", done: "Time to fly!" },
   { id: "aquarium", label: "The aquarium", emoji: "🦈", phrase: "We're going to the aquarium", done: "We're at the aquarium!" },
+  { id: "potty",  label: "Potty",     emoji: "🚽", phrase: "We're going to the potty",  done: "Potty time!" },
 ];
 
 /* ---------- her foods, drawn to match the real things ----------
@@ -462,6 +463,52 @@ TRANSITION_ART.aquarium = `
         </g>
       </g>
     </g>`;
+
+TRANSITION_ART.bed = `
+    <path d="M30 5.5 a 4.2 4.2 0 1 0 2.5 7.6 a 5.4 5.4 0 1 1 -2.5 -7.6 Z" fill="#f4c94f"/>
+    <path d="M36 11 l0.7 1.4 1.4 0.7 -1.4 0.7 -0.7 1.4 -0.7 -1.4 -1.4 -0.7 1.4 -0.7 Z" fill="#f4c94f"/>
+    <rect x="4" y="12" width="5" height="20" rx="2" fill="#c9a678"/>
+    <rect x="33" y="19" width="4" height="13" rx="1.8" fill="#c9a678"/>
+    <rect x="6" y="21" width="30" height="7" rx="2.5" fill="#fdf8ef"/>
+    <ellipse cx="12" cy="20.5" rx="5" ry="2.8" fill="#ffffff" stroke="#e3e8ee" stroke-width="1"/>
+    <path d="M16 20 C 22 18.5, 30 18.5, 35 20 L 36 26 C 36 27.5, 35 28, 34 28 L 16.5 28 Z" fill="#fdfdfa"/>
+    <!-- her jungle duvet: monkey, spiky-maned lion, leaves, pink flower -->
+    <circle cx="20.2" cy="23.8" r="1.9" fill="#8a5a3b"/>
+    <circle cx="18.5" cy="23.3" r="0.75" fill="#8a5a3b"/>
+    <circle cx="21.9" cy="23.3" r="0.75" fill="#8a5a3b"/>
+    <circle cx="20.2" cy="24.4" r="1.1" fill="#c99565"/>
+    <circle cx="19.6" cy="23.3" r="0.3" fill="#2e3440"/>
+    <circle cx="20.8" cy="23.3" r="0.3" fill="#2e3440"/>
+    <g stroke="#e8862f" stroke-width="0.55" stroke-linecap="round">
+      <path d="M31 20.4 V19.6 M31 26.8 V27.6 M27.8 23.6 H27 M34.2 23.6 H35
+               M28.7 21.3 L28.1 20.7 M33.3 21.3 L33.9 20.7 M28.7 25.9 L28.1 26.5 M33.3 25.9 L33.9 26.5
+               M29.6 20.7 L29.3 19.9 M32.4 20.7 L32.7 19.9 M28 24.8 L27.2 25.1 M34 24.8 L34.8 25.1
+               M28 22.4 L27.2 22.1 M34 22.4 L34.8 22.1 M29.6 26.5 L29.3 27.3 M32.4 26.5 L32.7 27.3"/>
+    </g>
+    <circle cx="31" cy="23.6" r="2.7" fill="#e8862f"/>
+    <circle cx="31" cy="23.6" r="1.8" fill="#f7d24b"/>
+    <circle cx="30.4" cy="23.2" r="0.35" fill="#463829"/>
+    <circle cx="31.6" cy="23.2" r="0.35" fill="#463829"/>
+    <path d="M30.6 24.4 C 30.9 24.7, 31.1 24.7, 31.4 24.4" stroke="#463829" stroke-width="0.4" fill="none"/>
+    <ellipse cx="25.5" cy="21.8" rx="1.4" ry="0.7" fill="#79b07a" transform="rotate(-25 25.5 21.8)"/>
+    <ellipse cx="34.2" cy="26.6" rx="1.3" ry="0.65" fill="#8fc98f" transform="rotate(20 34.2 26.6)"/>
+    <g fill="#f2a4c0">
+      <circle cx="24.6" cy="26.2" r="0.7"/><circle cx="26" cy="26.2" r="0.7"/>
+      <circle cx="25.3" cy="25.5" r="0.7"/><circle cx="25.3" cy="26.9" r="0.7"/>
+    </g>
+    <circle cx="25.3" cy="26.2" r="0.45" fill="#5b6ab8"/>
+    <rect x="5" y="30" width="3" height="4.5" rx="1.2" fill="#b08d5f"/>
+    <rect x="33.5" y="30" width="3" height="4.5" rx="1.2" fill="#b08d5f"/>`;
+
+TRANSITION_ART.potty = `
+    <path d="M9 14 C 9 11.5, 11 10, 13.5 10 L 26.5 10 C 29 10, 31 11.5, 31 14 L 31 17 L 9 17 Z" fill="#9fc2e0"/>
+    <ellipse cx="20" cy="17" rx="11" ry="3.6" fill="#ffffff" stroke="#cfd7e0" stroke-width="1"/>
+    <ellipse cx="20" cy="17" rx="6.5" ry="2" fill="#7f9bb8"/>
+    <path d="M9.5 18 C 9.5 25, 12 29.5, 14 30.5 L 26 30.5 C 28 29.5, 30.5 25, 30.5 18 C 27 20.5, 13 20.5, 9.5 18 Z" fill="#aecdee"/>
+    <path d="M12 31 L 28 31 C 28.8 31, 29.5 31.6, 29.5 32.4 C 29.5 33.2, 28.8 33.8, 28 33.8 L 12 33.8 C 11.2 33.8, 10.5 33.2, 10.5 32.4 C 10.5 31.6, 11.2 31, 12 31 Z" fill="#9fc2e0"/>
+    <circle cx="20" cy="25.5" r="2" fill="#f7d24b"/>
+    <circle cx="20.6" cy="24.9" r="0.4" fill="#463829"/>
+    <path d="M22 25.4 L 23.4 25.9 L 22 26.4 Z" fill="#e8862f"/>`;
 
 function transitionIconHTML(t) {
   return TRANSITION_ART[t.id]
