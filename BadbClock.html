@@ -606,6 +606,7 @@ body {
 }
 .video-overlay video { width: 100%; height: 100%; object-fit: contain; }
 .video-overlay .back-btn { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 14px; opacity: 0.85; }
+.video-overlay .cast-btn { left: auto; right: 14px; }
 
 .edit-food-list {
   display: flex;
@@ -684,6 +685,7 @@ body {
 <div id="video-player" class="video-overlay" hidden>
   <video id="video-el" playsinline loop controls controlslist="nodownload"></video>
   <button id="video-close" class="back-btn" aria-label="Close video">✕</button>
+  <button id="video-cast" class="back-btn cast-btn" aria-label="Watch on TV">📺</button>
 </div>
 
 <!-- Screen 1b: dinner or dessert? (food transition only) -->
@@ -806,7 +808,7 @@ body {
 
 "use strict";
 
-const APP_VERSION = "19"; // keep in step with the cache version in sw.js
+const APP_VERSION = "20"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -2199,6 +2201,34 @@ $("videos-btn").addEventListener("click", () => {
 });
 $("back-videos").addEventListener("click", () => showScreen("screen-choose"));
 $("video-close").addEventListener("click", closeVideo);
+
+/* "📺 TV": ask the phone to beam this video to a cast device (works on
+   some Android/Chromecast combinations even for local files); when it
+   can't, explain the screen-mirroring route that always works. */
+function castHelp() {
+  alert(
+    "To put this on the TV:\n\n" +
+      "1. Swipe down from the top of the phone and tap \"Screen Cast\" " +
+      "(on Samsung it's called Smart View).\n" +
+      "2. Pick your TV — the phone's screen appears on it.\n" +
+      "3. Come back here and press play.\n\n" +
+      "Works with Chromecast, Google TV and most smart TVs. " +
+      "Plug the phone in for long films."
+  );
+}
+
+$("video-cast").addEventListener("click", async () => {
+  const el = $("video-el");
+  if (el.remote && el.remote.prompt) {
+    try {
+      await el.remote.prompt();
+    } catch (_) {
+      castHelp();
+    }
+  } else {
+    castHelp();
+  }
+});
 $("video-remove-btn").addEventListener("click", () => {
   removingVideos = !removingVideos;
   renamingVideos = false;

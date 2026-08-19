@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "19"; // keep in step with the cache version in sw.js
+const APP_VERSION = "20"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -1397,6 +1397,34 @@ $("videos-btn").addEventListener("click", () => {
 });
 $("back-videos").addEventListener("click", () => showScreen("screen-choose"));
 $("video-close").addEventListener("click", closeVideo);
+
+/* "📺 TV": ask the phone to beam this video to a cast device (works on
+   some Android/Chromecast combinations even for local files); when it
+   can't, explain the screen-mirroring route that always works. */
+function castHelp() {
+  alert(
+    "To put this on the TV:\n\n" +
+      "1. Swipe down from the top of the phone and tap \"Screen Cast\" " +
+      "(on Samsung it's called Smart View).\n" +
+      "2. Pick your TV — the phone's screen appears on it.\n" +
+      "3. Come back here and press play.\n\n" +
+      "Works with Chromecast, Google TV and most smart TVs. " +
+      "Plug the phone in for long films."
+  );
+}
+
+$("video-cast").addEventListener("click", async () => {
+  const el = $("video-el");
+  if (el.remote && el.remote.prompt) {
+    try {
+      await el.remote.prompt();
+    } catch (_) {
+      castHelp();
+    }
+  } else {
+    castHelp();
+  }
+});
 $("video-remove-btn").addEventListener("click", () => {
   removingVideos = !removingVideos;
   renamingVideos = false;

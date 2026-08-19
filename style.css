@@ -595,6 +595,7 @@ body {
 }
 .video-overlay video { width: 100%; height: 100%; object-fit: contain; }
 .video-overlay .back-btn { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 14px; opacity: 0.85; }
+.video-overlay .cast-btn { left: auto; right: 14px; }
 
 .edit-food-list {
   display: flex;
