@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "21"; // keep in step with the cache version in sw.js
+const APP_VERSION = "22"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -1425,22 +1425,44 @@ function videoFilename(v) {
   return `${v.label}.${ext}`;
 }
 
-$("video-share").addEventListener("click", async () => {
-  if (!playingVideo) return;
-  const v = playingVideo;
-  const file = new File([v.blob], videoFilename(v), { type: v.blob.type || "video/mp4" });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: v.label });
-    } catch (_) { /* user closed the share sheet — fine */ }
-    return;
-  }
+function saveToDownloads(file) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(file);
   a.download = file.name;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-  alert(`Saved "${file.name}" to Downloads — open VLC and you'll find it there.`);
+  alert(
+    `Saved "${file.name}" to this phone's Downloads folder.\n\n` +
+      "Open VLC → Browse → Downloads and it's there. " +
+      "(Android wouldn't hand a file this big straight to another app, so it went via Downloads instead.)"
+  );
+}
+
+$("video-share").addEventListener("click", async () => {
+  if (!playingVideo) return;
+  const v = playingVideo;
+  const btn = $("video-share");
+  const file = new File([v.blob], videoFilename(v), { type: v.blob.type || "video/mp4" });
+  btn.textContent = "⏳";
+  btn.disabled = true;
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        // Big files take a while to hand over — the ⏳ shows meanwhile.
+        await navigator.share({ files: [file], title: v.label });
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return; // user closed the sheet
+        // Android refused (usually a size cap on shared files) → Downloads.
+      }
+    }
+    saveToDownloads(file);
+  } finally {
+    btn.textContent = "↗";
+    btn.disabled = false;
+  }
 });
 
 $("video-cast").addEventListener("click", async () => {
