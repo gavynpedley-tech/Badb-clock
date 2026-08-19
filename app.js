@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "20"; // keep in step with the cache version in sw.js
+const APP_VERSION = "21"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -1371,8 +1371,10 @@ function buildVideoGrid() {
 }
 
 let playingURL = null;
+let playingVideo = null;
 
 function openVideo(v) {
+  playingVideo = v;
   playingURL = URL.createObjectURL(v.blob);
   const el = $("video-el");
   el.src = playingURL;
@@ -1387,6 +1389,7 @@ function closeVideo() {
   el.load();
   if (playingURL) URL.revokeObjectURL(playingURL);
   playingURL = null;
+  playingVideo = null;
   $("video-player").hidden = true;
 }
 
@@ -1412,6 +1415,33 @@ function castHelp() {
       "Plug the phone in for long films."
   );
 }
+
+/* "↗": hand the file to another app via the Android share sheet — pick
+   VLC and it opens there (better codec support, proper Chromecast).
+   Where file-sharing isn't available, save a copy to Downloads instead. */
+function videoFilename(v) {
+  const byType = { "video/mp4": "mp4", "video/webm": "webm", "video/x-matroska": "mkv", "video/quicktime": "mov" };
+  const ext = byType[v.blob.type] || (v.blob.name || "").split(".").pop() || "mp4";
+  return `${v.label}.${ext}`;
+}
+
+$("video-share").addEventListener("click", async () => {
+  if (!playingVideo) return;
+  const v = playingVideo;
+  const file = new File([v.blob], videoFilename(v), { type: v.blob.type || "video/mp4" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: v.label });
+    } catch (_) { /* user closed the share sheet — fine */ }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(file);
+  a.download = file.name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  alert(`Saved "${file.name}" to Downloads — open VLC and you'll find it there.`);
+});
 
 $("video-cast").addEventListener("click", async () => {
   const el = $("video-el");
