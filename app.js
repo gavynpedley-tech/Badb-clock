@@ -4,7 +4,7 @@
 
 "use strict";
 
-const APP_VERSION = "22"; // keep in step with the cache version in sw.js
+const APP_VERSION = "23"; // keep in step with the cache version in sw.js
 
 const TRANSITIONS = [
   { id: "car",    label: "The car",   emoji: "🚗", phrase: "We're going to the car",   done: "We're at the car!" },
@@ -25,6 +25,7 @@ const TRANSITIONS = [
   { id: "plane",  label: "The plane", emoji: "✈️", phrase: "We're going on the plane", done: "Time to fly!" },
   { id: "aquarium", label: "The aquarium", emoji: "🦈", phrase: "We're going to the aquarium", done: "We're at the aquarium!" },
   { id: "potty",  label: "Potty",     emoji: "🚽", phrase: "We're going to the potty",  done: "Potty time!" },
+  { id: "cookies", label: "Cookies",  emoji: "🍪", phrase: "The cookies are baking!",   done: "Yum! Cookies!", arrival: "oven" },
 ];
 
 /* ---------- her foods, drawn to match the real things ----------
@@ -510,6 +511,62 @@ TRANSITION_ART.potty = `
     <circle cx="20.6" cy="24.9" r="0.4" fill="#463829"/>
     <path d="M22 25.4 L 23.4 25.9 L 22 26.4 Z" fill="#e8862f"/>`;
 
+TRANSITION_ART.cookies = `
+    <rect x="6" y="8" width="28" height="26" rx="3" fill="#dbe2e8"/>
+    <rect x="6" y="8" width="28" height="6" rx="3" fill="#c6cfd8"/>
+    <circle cx="11" cy="11" r="1.3" fill="#7f9bb8"/>
+    <circle cx="16" cy="11" r="1.3" fill="#7f9bb8"/>
+    <circle cx="21" cy="11" r="1.3" fill="#7f9bb8"/>
+    <circle cx="29.5" cy="11" r="1" fill="#e05a8a"/>
+    <rect x="10" y="15" width="20" height="1.8" rx="0.9" fill="#eef2f6"/>
+    <rect x="9" y="18" width="22" height="13.5" rx="2" fill="#9fb2c1"/>
+    <rect x="11.5" y="20" width="17" height="9.5" rx="1.5" fill="#503a2e"/>
+    <ellipse cx="20" cy="28" rx="8" ry="3" fill="#e8862f" opacity="0.5">
+      <animate attributeName="opacity" values="0.35;0.7;0.35" dur="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <path d="M13 27.5 H27" stroke="#6b533f" stroke-width="1"/>
+    <circle cx="20" cy="25" r="3.6" fill="#d9a05b"/>
+    <path d="M17.5 24 l1.2 -0.4 M21 23 l1.2 0.3 M18.5 26.4 l1.1 0.3" stroke="#e8c48c" stroke-width="0.6" stroke-linecap="round"/>
+    <circle cx="18.6" cy="24.2" r="0.6" fill="#4a2f1d"/>
+    <circle cx="21.4" cy="25.6" r="0.6" fill="#4a2f1d"/>
+    <circle cx="19.8" cy="26.6" r="0.5" fill="#4a2f1d"/>
+    <rect x="8" y="34" width="3" height="2" rx="1" fill="#aebfcc"/>
+    <rect x="29" y="34" width="3" height="2" rx="1" fill="#aebfcc"/>`;
+
+/* The cookies are done: door swung open, cookie presented, steam rising. */
+function ovenOpenSVG() {
+  return `<svg class="arrival-svg" viewBox="0 0 40 40" aria-hidden="true">
+    <path d="M4 6 l0.8 1.6 1.6 0.8 -1.6 0.8 -0.8 1.6 -0.8 -1.6 -1.6 -0.8 1.6 -0.8 Z" fill="#f4c94f"/>
+    <path d="M35.5 9 l0.7 1.4 1.4 0.7 -1.4 0.7 -0.7 1.4 -0.7 -1.4 -1.4 -0.7 1.4 -0.7 Z" fill="#f4c94f"/>
+    <rect x="6" y="6" width="28" height="25" rx="3" fill="#dbe2e8"/>
+    <rect x="6" y="6" width="28" height="6" rx="3" fill="#c6cfd8"/>
+    <circle cx="11" cy="9" r="1.3" fill="#7f9bb8"/>
+    <circle cx="16" cy="9" r="1.3" fill="#7f9bb8"/>
+    <circle cx="21" cy="9" r="1.3" fill="#7f9bb8"/>
+    <circle cx="29.5" cy="9" r="1" fill="#8fc98f"/>
+    <rect x="9" y="14" width="22" height="15" rx="2" fill="#503a2e"/>
+    <ellipse cx="20" cy="26" rx="9" ry="3.2" fill="#e8862f" opacity="0.55"/>
+    <path d="M11 25.5 H29" stroke="#6b533f" stroke-width="1.2"/>
+    <circle cx="20" cy="21.5" r="5.4" fill="#d9a05b"/>
+    <path d="M16.5 20 l1.6 -0.5 M22 18.6 l1.6 0.4 M17.6 23.6 l1.5 0.4 M21.5 23.8 l1.4 -0.4" stroke="#e8c48c" stroke-width="0.8" stroke-linecap="round"/>
+    <circle cx="18" cy="20.6" r="0.9" fill="#4a2f1d"/>
+    <circle cx="22.2" cy="21.8" r="0.9" fill="#4a2f1d"/>
+    <circle cx="19.8" cy="23.6" r="0.8" fill="#4a2f1d"/>
+    <circle cx="21" cy="19" r="0.7" fill="#4a2f1d"/>
+    <path d="M17 15.5 C 16 13.5, 18 12.5, 17 10.5" stroke="#eef2f6" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.85">
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.85;0" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M23 15 C 24 13, 22 12, 23 10" stroke="#eef2f6" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.85">
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3" dur="2.4s" begin="0.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.85;0" dur="2.4s" begin="0.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M9 30 L31 30 L34.5 37 L5.5 37 Z" fill="#9fb2c1"/>
+    <path d="M11.5 31.5 L28.5 31.5 L30.5 35.5 L9.5 35.5 Z" fill="#7d94a8"/>
+    <rect x="5" y="36.5" width="30" height="1.8" rx="0.9" fill="#eef2f6"/>
+  </svg>`;
+}
+
 function transitionIconHTML(t) {
   return TRANSITION_ART[t.id]
     ? `<svg class="food-svg" viewBox="0 0 40 40" aria-hidden="true">${TRANSITION_ART[t.id]}</svg>`
@@ -722,7 +779,7 @@ function startTimer(seconds) {
   // scene-style destinations (brushing, dance party, aquarium) get extra room
   $("destination").classList.toggle(
     "huge",
-    brushing || (!state.food && ["disco", "aquarium"].includes(state.transition.id))
+    brushing || (!state.food && ["disco", "aquarium", "cookies"].includes(state.transition.id))
   );
   $("walker").classList.add("walking");
   $("destination").classList.remove("nearly");
@@ -771,6 +828,17 @@ function finishTimer() {
   state.intervalId = null;
   releaseWakeLock();
   stopMusic();
+
+  // Cookies done: the oven opens, steam rises, and a "Yum!"
+  if (state.transition.arrival === "oven") {
+    $("done-emoji").innerHTML = ovenOpenSVG();
+    $("done-phrase").textContent = state.transition.done;
+    showScreen("screen-done");
+    playChime();
+    setTimeout(() => playCheer("Yum!"), 1400);
+    dropConfetti(["🍪", "⭐", "✨", "💛"], 26);
+    return;
+  }
 
   // Teeth done: a sparkly-smile close-up with a cheer.
   if (state.transition.activity === "brush" && state.character.img) {
@@ -897,15 +965,16 @@ function sparkleSmileSVG() {
 </svg>`;
 }
 
-/* A little cheer: a spoken "Yay!" where speech synthesis exists, plus a
-   quick sparkly run-up so there's always something joyful to hear. */
-function playYay() {
+/* A little cheer: a spoken word ("Yay!", "Yum!") where speech synthesis
+   exists, plus a quick sparkly run-up so there's always something joyful. */
+function playYay() { playCheer("Yay!"); }
+function playCheer(word) {
   try {
     if ("speechSynthesis" in window) {
-      const yay = new SpeechSynthesisUtterance("Yay!");
-      yay.pitch = 1.8;
-      yay.rate = 1.1;
-      speechSynthesis.speak(yay);
+      const cheer = new SpeechSynthesisUtterance(word);
+      cheer.pitch = 1.8;
+      cheer.rate = 1.1;
+      speechSynthesis.speak(cheer);
     }
   } catch (_) { /* fine without it */ }
   try {
